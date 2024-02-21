@@ -1,0 +1,2321 @@
+openapi: 3.1.0
+info:
+  title: todo-app API
+  description: |-
+    ## 概要
+    - todo-appのAPI仕様書
+servers:
+  - url: http://localhost:1000
+    description: ローカル開発環境
+paths:
+  /health:
+    get:
+      summary: 疎通確認用エンドポイント
+      description: |-
+        ## 概要
+        - APIサーバーの疎通確認を行う
+      tags:
+        - common
+      operationId: healthCheck
+      security: []
+      responses:
+        "200":
+          description: Successfully connected
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/health_check"
+        default:
+          $ref: "#/components/responses/error_admin_unexpected"
+  /api/app/v1/auth:
+    get:
+      summary: Authorization code flowを開始するエンドポイント
+      description: |-
+        ## 概要
+        - Authorization code flowを開始する
+        - stateとnonceを生成し、ID基盤の認可エンドポイントにリダイレクトする
+        - stateとnonceはff_pre_authセッションに保存される
+      tags:
+        - app
+        - appauth
+      operationId: auth
+      security: []
+      responses:
+        "302":
+          description: ID基盤の認可エンドポイントにリダイレクトする
+          headers:
+            Set-Cookie:
+              description: stateとnonceを保存するためにCookieにセットする値
+              schema:
+                type: string
+                example: ff_pre_auth=Fvfeqf3qf; Path=/; HttpOnly; Secure; Expires=Thu, 01 Jan 1970 00:00:00 GMT
+            Location:
+              description: リダイレクト先のID基盤の認可エンドポイントのURL
+              schema:
+                type: string
+                format: uri
+                example: https://idpf.example.com/authorize?response_type=code&client_id=client_id&redirect_uri=https://app.example.jp/callback&scope=openid%20profile%20email&state=state&nonce=nonce
+        default:
+          $ref: "#/components/responses/error_app_unexpected"
+  /api/app/v1/callback:
+    get:
+      summary: Authorization code flowにおいて、受けとった認可コードを用いてアクセストークンを取得するリダイレクトエンドポイント
+      description: |-
+        ## 概要
+        - Authorization code flowにおいて、受けとった認可コードを用いてアクセストークンを取得する
+        - ff_pre_authセッションに保存されたstateの検証を行う
+        - 発行されたIDトークンを検証し、ユーザー情報を取得する
+        - 新規登録の場合はfanfancyの新規ユーザー登録も行う
+        - 復旧可能の場合はフラグを返す
+        - fanfancyの認証セッションを開始する
+      tags:
+        - app
+        - appauth
+        - registoration
+      operationId: callback
+      security: []
+      parameters:
+        - name: state
+          in: query
+          description: CSRF対策のためのランダムな文字列
+          required: true
+          schema:
+            type: string
+            example: 1234567890abcdefg
+        - name: code
+          in: query
+          description: 認可コード
+          required: false
+          schema:
+            type: string
+            example: 1234567890abcdefg
+        - name: error
+          in: query
+          description: エラーの場合のエラーコード
+          required: false
+          schema:
+            type: string
+            example: login_required
+      responses:
+        "200":
+          description: Tokenの取得に成功
+          headers:
+            Set-Cookie:
+              description: 認証情報を保持するためにCookieにセットする値
+              schema:
+                type: string
+                example: ff_session=1234567890abcdefg; Path=/; Expires=Wed, 21 Oct 2020 07:28:00 GMT; HttpOnly; Secure;
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/callback"
+        "401":
+          $ref: "#/components/responses/error_app_authn_401"
+        default:
+          $ref: "#/components/responses/error_app_unexpected"
+  /api/app/v1/init:
+    post:
+      summary: ユーザーアプリ起動時にリフレッシュトークンを使用してユーザー認証を行うエンドポイント
+      description: |-
+        ## 概要
+        - ユーザーアプリ起動時に、リフレッシュトークンを使用してIDトークンとアクセストークンを取得する
+        - 取得したIDトークンを元にユーザー認証を行う
+        - 認証セッションを開始する
+      tags:
+        - app
+        - appauth
+      operationId: init
+      security: []
+      requestBody:
+        description: ユーザー認証を行うための情報
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  description: |
+                    - ID基盤から発行されるリフレッシュトークン
+                    - リフレッシュトークンがセットされない場合は、認証セッションを開始せずにアプリを起動する
+                  type: string
+                  example: eyJhbGciOiJIUzI1NiJ9.eyJzdWI
+      responses:
+        "200":
+          description: Successfully start fanfancy app
+          headers:
+            Set-Cookie:
+              description: |
+                - 認証情報を保持するためにCookieにセットする値
+                - リクエストにrefresh_tokenが含まれていない場合は、Cookieにセットされない
+              schema:
+                type: string
+                example: ff_session=1234567890abcdefg; Path=/; Expires=Wed, 21 Oct 2020 07:28:00 GMT; HttpOnly; Secure;
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/init_app"
+        "401":
+          $ref: "#/components/responses/error_app_authn_401"
+        default:
+          $ref: "#/components/responses/error_app_unexpected"
+  /api/app/v1/refresh-token:
+    post:
+      summary: リフレッシュトークンを使用して全てのトークンを更新するエンドポイント
+      description: |-
+        ## 概要
+        - リフレッシュトークンを使用して、全てのトークンを更新する
+      tags:
+        - app
+        - appauth
+      operationId: refreshToken
+      security: []
+      requestBody:
+        description: ID基盤から発行されたリフレッシュトークン
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+                  description: リフレッシュトークン
+                  example: 1234567890abcdefg
+              required:
+                - refresh_token
+      responses:
+        "200":
+          description: Successfully get new tokens
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/refresh_token"
+        "401":
+          $ref: "#/components/responses/error_app_authn_401"
+        default:
+          $ref: "#/components/responses/error_app_unexpected"
+  /api/app/v1/logout:
+    post:
+      summary: fanfancyサービスからログアウトするエンドポイント
+      description: |-
+        ## 概要
+        - fanfancyサービスからログアウトする
+        - ID基盤から発行されたアクセストークンとリフレッシュトークンを無効化する
+        - 認証セッションを終了する
+      tags:
+        - app
+        - appauth
+      operationId: logout
+      security:
+        - ffSessionAuth: []
+      responses:
+        "204":
+          description: Successfully logout
+        "401":
+          $ref: "#/components/responses/error_app_authn_401"
+        default:
+          $ref: "#/components/responses/error_app_unexpected"
+  /api/app/v1/withdrawal:
+    post:
+      summary: fanfancyサービスを利用しているユーザーの退会処理を行うエンドポイント
+      description: |-
+        ## 概要
+        - fanfancyサービスを利用しているユーザーの退会処理を行う
+        - fanfancyの退会処理はユーザーの情報を一時的に復旧可能ユーザーに移すことに対応する
+        - 退会後は一定期間復旧可能で、一定期間経ったのちに論理削除される
+        - ID基盤に対しては、ユーザーのfanfancyへの同意を取り下げる
+        - 認証セッションを終了する
+      tags:
+        - app
+        - appauth
+      operationId: withdrawal
+      security:
+        - ffSessionAuth: []
+      responses:
+        "204":
+          description: Successfully withdrawal
+        "401":
+          $ref: "#/components/responses/error_app_authn_401"
+        default:
+          $ref: "#/components/responses/error_app_unexpected"
+  /api/app/v1/users/me:
+    get:
+      summary: ユーザーのプロフィール情報を取得するエンドポイント
+      description: |-
+        ## 概要
+        - 認証されたユーザーのプロフィール情報を取得する
+        - ID基盤に登録されているユーザー情報とfanfancyのユーザー情報を結合して返す
+      tags:
+        - app
+        - appauth
+        - users
+      operationId: getUserMe
+      security:
+        - ffSessionAuth: []
+      responses:
+        "200":
+          description: Successfully get user information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/users_me"
+        "401":
+          $ref: "#/components/responses/error_app_authn_401"
+        "404":
+          description: |-
+            - 認証されているユーザーが存在しない場合のエラーレスポンス, エラーコード: 2000
+            - 認証されている時点でユーザーが存在しないことはありえないので, このエラーは起こりえないはず
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_ff"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_app"
+  /api/app/v1/users/restart:
+    post:
+      summary: ユーザーがfanfancyサービスを退会済みの場合、復旧してサービスを再開するエンドポイント
+      description: |-
+        ## 概要
+        - ユーザーがfanfancyサービスを退会済みでかつ復旧可能期間内の場合、過去のユーザー情報を復旧してfanfancyサービスを再開する
+      tags:
+        - app
+        - registoration
+      operationId: restartUser
+      security:
+        - ffSessionAuth: []
+      responses:
+        "204":
+          description: Successfully restart user
+        "400":
+          description: |-
+            - ユーザーが復旧可能でない場合のエラーレスポンス, エラーコード: 2001
+            - ユーザーが削除済みの場合のエラーレスポンス, エラーコード: 2002
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_ff"
+        "401":
+          $ref: "#/components/responses/error_app_authn_401"
+        default:
+          $ref: "#/components/responses/error_app_unexpected"
+  /api/app/v1/users/newstart:
+    post:
+      summary: ユーザーがfanfancyサービスを退会済みの場合、新規にユーザーを作成してサービスを再開するエンドポイント
+      description: |-
+        ## 概要
+        - ユーザーがfanfancyサービスを退会済みでかつ復旧可能期間内であるが、復旧せずに新規にユーザーを作成してサービスを再開する
+      tags:
+        - app
+        - registoration
+      operationId: newstartUser
+      security:
+        - ffSessionAuth: []
+      responses:
+        "201":
+          description: Successfully create new user
+        "400":
+          description: |-
+            - ユーザーが復旧可能でない場合のエラーレスポンス, エラーコード: 2001
+            - ユーザーが削除済みの場合のエラーレスポンス, エラーコード: 2002
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_ff"
+        "401":
+          $ref: "#/components/responses/error_app_authn_401"
+        default:
+          $ref: "#/components/responses/error_app_unexpected"
+  /api/app/v1/users/flower:
+    get:
+      summary: ユーザーの現在のフラワースタンドの情報を取得するエンドポイント
+      description: |-
+        ## 概要
+        - 認証されたユーザーの現在のフラワースタンドの情報を取得する
+        - フラワースタンドに載せている推しの画像と、ポイントに応じた背景の画像を返す
+      tags:
+        - app
+        - users
+        - flower-stand
+      operationId: getUserFlowerStand
+      security:
+        - ffSessionAuth: []
+      responses:
+        "200":
+          description: Successfully get user flower stand
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/users_flower"
+        "401":
+          $ref: "#/components/responses/error_app_authn_401"
+        "404":
+          description: |-
+            - ユーザーのフラワースタンドが存在しない場合のエラーレスポンス, エラーコード: 2300
+            - ユーザー新規登録時にフラワースタンドも作成されるはずなので, このエラーは起こりえないはず
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_ff"
+        default:
+          $ref: "#/components/responses/error_app_unexpected"
+  /api/app/v1/users/flower/upload:
+    post:
+      summary: フラワースタンドに載せる推しの画像をアップロードするエンドポイント
+      description: |-
+        ## 概要
+        - 認証されたユーザーのフラワースタンドに載せる推しの画像をアップロードする
+        - リサイズされた画像をアップロードし、その画像のURLを返す
+      tags:
+        - app
+        - users
+        - flower-stand
+      operationId: uploadOshiImg
+      security:
+        - ffSessionAuth: []
+      requestBody:
+        description: "- アップロードする画像ファイルを指定する"
+        required: true
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+          image/jpeg:
+            schema:
+              type: string
+              format: binary
+          image/gif:
+            schema:
+              type: string
+              format: binary
+      responses:
+        "202":
+          description: Successfully upload oshi image
+        "400":
+          description: |
+            - Uploadされた画像サイズが5MBを超える場合, エラーコード: 2301
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_ff"
+        "401":
+          $ref: "#/components/responses/error_app_authn_401"
+        default:
+          $ref: "#/components/responses/error_app_unexpected"
+  /api/app/v1/users/points:
+    get:
+      summary: ユーザーの現在のポイントと有効期限を取得するエンドポイント
+      description: |-
+        ## 概要
+        - 認証されたユーザーのポイント情報を取得する
+        - ポイントが存在しない場合は0が返る
+        - ポイントの有効期限は、最後にポイントを獲得or使用した日から1年間
+      tags:
+        - app
+        - users
+        - points
+      operationId: getUserPoints
+      security:
+        - ffSessionAuth: []
+      responses:
+        "200":
+          description: Successfully get the user's point
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/users_points"
+        "401":
+          $ref: "#/components/responses/error_app_authn_401"
+        "404":
+          description: |-
+            - 認証されているユーザーが存在しない場合のエラーレスポンス, エラーコード: 2000
+            - 認証されている時点でユーザーが存在しないことはありえないので, このエラーは起こりえないはず
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_ff"
+        default:
+          $ref: "#/components/responses/error_app_unexpected"
+  /api/app/v1/users/points/history:
+    get:
+      summary: ユーザーのポイント履歴を取得するエンドポイント
+      description: |-
+        ## 概要
+        - 認証されたユーザーのポイント獲得履歴および使用履歴を取得する
+        - ポイント履歴が存在しない場合は空の配列が返る
+      tags:
+        - app
+        - users
+        - points
+      operationId: getUserPointHistory
+      security:
+        - ffSessionAuth: []
+      parameters:
+        - in: query
+          name: page
+          description: page number start from 1
+          required: false
+          schema:
+            type: integer
+            format: int64
+            default: 1
+      responses:
+        "200":
+          description: Successfully get user point history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/users_points_history"
+        "401":
+          $ref: "#/components/responses/error_app_authn_401"
+        "404":
+          description: |-
+            - 認証されているユーザーが存在しない場合のエラーレスポンス, エラーコード: 2000
+            - 認証されている時点でユーザーが存在しないことはありえないので, このエラーは起こりえないはず
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_ff"
+        default:
+          $ref: "#/components/responses/error_app_unexpected"
+  /api/app/v1/users/tickets/{ticket_id}:
+    post:
+      summary: ユーザーに、ID指定されたチケットを発行し、発行したチケットを使用するエンドポイント
+      description: |-
+        ## 概要
+        - 認証されたユーザーに、IDで指定されたチケットを発行する
+        - 発行と同時にチケットは使用される
+      tags:
+        - app
+        - users
+        - tickets
+      operationId: issueTicketAndUse
+      security:
+        - ffSessionAuth: []
+      parameters:
+        - name: ticket_id
+          in: path
+          description: ticket id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "201":
+          description: Successfully issue a ticket and use it
+        "400":
+          description: "- チケットの発行に必要なポイントが足りない場合のエラーレスポンス, エラーコード: 2401"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_ff"
+        "401":
+          $ref: "#/components/responses/error_app_authn_401"
+        "404":
+          description: "- ID指定されたチケットが存在しない場合のエラーレスポンス, エラーコード: 2400"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_ff"
+        default:
+          $ref: "#/components/responses/error_app_unexpected"
+  /api/app/v1/users/sales-token:
+    post:
+      summary: 購買情報のJWTを読み取り、売上の登録とポイント付与を行うエンドポイント
+      description: |-
+        ## 概要
+        - 購買情報の格納されたJWTを受け取り、売上の登録とポイント付与を行う
+        - JWTの検証に失敗した場合は400エラーを返す
+      tags:
+        - app
+        - users
+        - sales
+        - points
+      operationId: registerSalesHistoryAndGivePoints
+      security:
+        - ffSessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                sales_token:
+                  description: 購買情報のJWT
+                  type: string
+                  example: eyJhbGciOiJIUzI1NiJ9.eyJzdWI
+              required:
+                - sales_token
+      responses:
+        "200":
+          description: Successfully registered sales history and give points to user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/users_sales_token"
+        "400":
+          description: |
+            - sales_tokenが改ざんされている場合, エラーコード: 2200
+            - sales_tokenの有効期限が切れていた場合, エラーコード: 2201
+            - sales_tokenがすでに使用済みの場合, エラーコード: 2202
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_ff"
+        "401":
+          $ref: "#/components/responses/error_app_authn_401"
+        default:
+          $ref: "#/components/responses/error_app_unexpected"
+  /api/app/v1/tickets:
+    get:
+      summary: チケット一覧を取得するエンドポイント
+      description: |-
+        ## 概要
+        - チケット一覧を取得する
+        - チケットが存在しない場合は空の配列が返る
+        - 認証不要
+      tags:
+        - app
+        - tickets
+      operationId: getTickets
+      security: []
+      responses:
+        "200":
+          description: Successfully get all tickets information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/tickets_list"
+        default:
+          $ref: "#/components/responses/error_app_unexpected"
+  /api/app/v1/news:
+    get:
+      summary: ページ指定されたニュース一覧を取得するエンドポイント
+      description: |-
+        ## 概要
+        - 指定されたページのニュース一覧を取得する
+        - ページ指定がない場合は1ページ目を取得する
+        - ページ範囲が適切でない場合は空の配列が返る
+        - 認証不要
+      tags:
+        - app
+        - news
+      operationId: getNews
+      security: []
+      parameters:
+        - in: query
+          name: page
+          description: The page number start from 1
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 1
+      responses:
+        "200":
+          description: Successfully get news by page
+          headers:
+            Link:
+              description: The links to the first, last, next and previous pages
+              schema:
+                type: string
+                example: <https://api.example.com/next-news-page>; rel="next", <https://api.example.com/last-news-page>; rel="last"
+            Total-Count:
+              description: The total number of news pages
+              schema:
+                type: integer
+                format: int64
+                example: 10
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/news_list"
+        default:
+          $ref: "#/components/responses/error_app_unexpected"
+  /api/app/v1/news/{news_id}:
+    get:
+      summary: ID指定されたニュースの詳細を取得するエンドポイント
+      description: |-
+        ## 概要
+        - ID指定されたニュースの詳細を取得する
+        - ID指定されたニュースが存在しない場合は404エラーが返る
+      tags:
+        - app
+        - news
+      operationId: getNewsByID
+      security: []
+      parameters:
+        - name: news_id
+          in: path
+          description: news id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successfully get the news detail by ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/news_detail"
+        "404":
+          description: "- ID指定されたニュースが存在しない場合のエラーレスポンス, エラーコード: 2500"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_ff"
+        default:
+          $ref: "#/components/responses/error_app_unexpected"
+  /api/app/v1/news/latest:
+    get:
+      summary: 指定した数の最新ニュースを取得するエンドポイント
+      description: |-
+        ## 概要
+        - 指定した数の最新ニュースを取得する
+        - ニュースが存在しない場合は空の配列が返る
+      tags:
+        - app
+        - news
+      operationId: getLatestNews
+      security: []
+      parameters:
+        - in: query
+          name: news_size
+          description: 取得する最新ニュースの数
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 4
+            maximum: 10
+      responses:
+        "200":
+          description: Successfully get the latest news
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/news_list"
+        default:
+          $ref: "#/components/responses/error_app_unexpected"
+  /api/app/v1/shops:
+    get:
+      summary: 店舗一覧を取得するエンドポイント
+      description: |-
+        ## 概要
+        - 店舗一覧を取得する
+        - 店舗が存在しない場合は空の配列が返る
+        - 認証不要
+      tags:
+        - app
+        - shops
+      operationId: getShops
+      security: []
+      responses:
+        "200":
+          description: Successfully get all shop information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/shops_list"
+        default:
+          $ref: "#/components/responses/error_app_unexpected"
+  /api/admin/v1/operators:
+    get:
+      summary: Get all operators.
+      description: This API is used to get all operators for admin application.
+      security:
+        - firebaseBearerAuth: []
+      tags:
+        - admin
+        - operators
+      operationId: getOperators
+      responses:
+        "200":
+          description: Successfully get all operators.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/operators_list"
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+    post:
+      summary: Create one operator by id_token.
+      description: This API is used to create one operator by firebase id_token.
+      tags:
+        - admin
+        - operators
+      operationId: createOperator
+      security:
+        - firebaseBearerAuth: []
+      responses:
+        "201":
+          description: Successfully created the operator.
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+  /api/admin/v1/operators/me:
+    get:
+      summary: Get operator details.
+      description: This API is used to get operator details.
+      security:
+        - firebaseBearerAuth: []
+      tags:
+        - admin
+        - operators
+      operationId: getOperatorMe
+      responses:
+        "200":
+          description: Successfully get the operator details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/operator_detail"
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+  /api/admin/v1/operators/{operator_id}:
+    get:
+      summary: Get operator details by operator id.
+      description: This API is used to get operator details by operator id.
+      security:
+        - firebaseBearerAuth: []
+      tags:
+        - admin
+        - operators
+      operationId: getOperatorByID
+      parameters:
+        - name: operator_id
+          in: path
+          description: Operator id.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully get the operator details by operator id.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/operator_detail"
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "404":
+          description: Operator not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+    put:
+      summary: Update operator details by operator id.
+      description: This API is used to update operator details by operator id.
+      security:
+        - firebaseBearerAuth: []
+      tags:
+        - admin
+        - operators
+      operationId: updateOperatorByID
+      parameters:
+        - name: operator_id
+          in: path
+          description: Operator id.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully update the operator details by operator id. Return the updated operator details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/operator_detail"
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "404":
+          description: Operator not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+    delete:
+      summary: Delete operator by operator id.
+      description: This API is used to delete operator by operator id.
+      security:
+        - firebaseBearerAuth: []
+      tags:
+        - admin
+        - operators
+      operationId: deleteOperatorByID
+      parameters:
+        - name: operator_id
+          in: path
+          description: Operator id.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully delete the operator by operator id. Return the deleted operator details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/operator_detail"
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "404":
+          description: Operator not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+  /api/admin/v1/tickets:
+    get:
+      summary: Get all tickets information.
+      description: This API is used to get tickets information.
+      security:
+        - firebaseBearerAuth: []
+      tags:
+        - admin
+        - tickets
+      operationId: getTicketsForAdmin
+      parameters:
+        - in: query
+          name: status
+          description: ticket status.
+          required: false
+          schema:
+            type: string
+            enum:
+              - available
+              - unavailable
+              - scheduled
+              - all
+            default: all
+        - in: query
+          name: page
+          description: page number start from 1.
+          required: false
+          schema:
+            type: integer
+            format: int64
+            default: 1
+      responses:
+        "200":
+          description: Successfully get the tickets information.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/tickets_list_admin"
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+    post:
+      summary: Create the new ticket.
+      description: This API is used to create a ticket.
+      security:
+        - firebaseBearerAuth: []
+      tags:
+        - admin
+        - tickets
+      operationId: createTicket
+      requestBody:
+        description: Ticket information.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ticket_request"
+      responses:
+        "201":
+          description: Successfully create a ticket.
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+  /api/admin/v1/tickets/{ticket_id}:
+    get:
+      summary: Get the tickets information by ticket id.
+      description: This API is used to get the ticket information by ticket id.
+      security:
+        - firebaseBearerAuth: []
+      tags:
+        - admin
+        - tickets
+      operationId: getTicketByID
+      parameters:
+        - name: ticket_id
+          in: path
+          description: ticket id.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully get the ticket details by ticket id.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ticket_admin"
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "404":
+          description: Operator not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+    put:
+      summary: Update the ticket information by ticket id.
+      description: This API is used to update the ticket information by ticket id.
+      security:
+        - firebaseBearerAuth: []
+      tags:
+        - admin
+        - operators
+      operationId: updateTicketByID
+      parameters:
+        - name: ticket_id
+          in: path
+          description: Ticket id.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully update the ticket information by ticket id. Return the updated ticket details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ticket_admin"
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "404":
+          description: Operator not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+    delete:
+      summary: Delete the ticket by ticket id.
+      description: This API is used to delete the ticket by ticket id.
+      security:
+        - firebaseBearerAuth: []
+      tags:
+        - admin
+        - operators
+      operationId: deleteTicketByID
+      parameters:
+        - name: ticket_id
+          in: path
+          description: Ticket id.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully delete the ticket by ticket id. Return the deleted ticket details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ticket_admin"
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "404":
+          description: Operator not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+  /api/admin/v1/news:
+    get:
+      summary: Get news information.
+      description: This API is used to get news information.
+      security:
+        - firebaseBearerAuth: []
+      tags:
+        - admin
+        - news
+      operationId: getNewsForAdmin
+      parameters:
+        - in: query
+          name: status
+          description: news status.
+          required: false
+          schema:
+            type: string
+            enum:
+              - published
+              - scheduled
+              - all
+            default: all
+        - in: query
+          name: page
+          description: page number start from 1.
+          required: false
+          schema:
+            type: integer
+            format: int64
+            default: 1
+      responses:
+        "200":
+          description: Successfully get the news information.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/news_list_admin"
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+    post:
+      summary: Create a news.
+      description: This API is used to create a news.
+      security:
+        - firebaseBearerAuth: []
+      tags:
+        - admin
+        - news
+      operationId: createNews
+      requestBody:
+        description: News information.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/news_request"
+      responses:
+        "201":
+          description: Successfully create a news.
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+  /api/admin/v1/news/{news_id}:
+    get:
+      summary: Get the news information by news id.
+      description: This API is used to get the news information by news id.
+      security:
+        - firebaseBearerAuth: []
+      tags:
+        - admin
+        - news
+      operationId: getNewsByIDForAdmin
+      parameters:
+        - name: news_id
+          in: path
+          description: news id.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully get the news details by news id.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/news_admin"
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "404":
+          description: News not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+    put:
+      summary: Update the news information by news id.
+      description: This API is used to update the news information by news id.
+      security:
+        - firebaseBearerAuth: []
+      tags:
+        - admin
+        - news
+      operationId: updateNewsByID
+      parameters:
+        - name: news_id
+          in: path
+          description: News id.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully update the news information by news id. Return the updated news details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/news_admin"
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "404":
+          description: News not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+    delete:
+      summary: Delete the news by news id.
+      description: This API is used to delete the news by news id.
+      security:
+        - firebaseBearerAuth: []
+      tags:
+        - admin
+        - news
+      operationId: deleteNewsByID
+      parameters:
+        - name: news_id
+          in: path
+          description: News id.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully delete the news by news id. Return the deleted news details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/news_admin"
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "404":
+          description: News not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_admin"
+components:
+  securitySchemes:
+    ffSessionAuth:
+      type: apiKey
+      in: cookie
+      name: ff_session
+      description: |
+        - セッションベースの認証
+        - ユーザーがログインすると、セッションIDがクッキーに設定される
+        - このセッションIDをクッキーとして送信することで、認証されたユーザーとしてアクセスできる
+        - セッションIDは、ログアウトするか一定時間経過すると無効になる
+    firebaseBearerAuth:
+      description: FirebaseのIDトークンを使ったオペレーター認証
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    error_admin:
+      title: 管理アプリ用エラーレスポンス
+      description: |-
+        ## 概要
+        - 管理アプリ用エラーレスポンスの定義
+
+        ## 詳細
+        - 管理アプリ用にはエラーメッセージに加えて、コード上のエラーの詳細をアプリ側に返す
+      type: object
+      properties:
+        message:
+          description: エラーメッセージ
+          type: string
+        description:
+          description: エラーの詳細
+          type: string
+      required:
+        - message
+        - description
+    health_check:
+      title: 疎通確認レスポンス
+      description: |-
+        ## 概要
+        - サーバーの状態を返す
+        - 問題なければOKを返す
+      type: string
+      example: OK
+    error_app:
+      title: ユーザーアプリ用のUnexpectedエラーレスポンス
+      description: |-
+        ## 概要
+        - ユーザーアプリ用のUnexpectedエラーレスポンスの定義
+
+        ## 詳細
+        - ユーザーアプリでInternalServerErrorなどのUnexpectedなエラーが起きた時のレスポンスで、エラーの詳細は返さない
+        - messageにはHTTPのStatusCodeと同じメッセージを返す
+        - 例えばStatusCodeが500の場合, messageには"Internal Server Error"を返す
+      type: object
+      properties:
+        message:
+          description: エラーメッセージ
+          type: string
+          example: Internal Server Error
+      required:
+        - message
+    tokens:
+      title: ユーザーアプリに有効なトークンを返すレスポンス
+      description: |-
+        ## 概要
+        - ユーザーアプリに有効なトークンを返すレスポンスの定義
+      type: object
+      properties:
+        refresh_token:
+          description: リフレッシュトークン
+          type: string
+          example: 1234567890abcdefg
+      required:
+        - refresh_token
+    callback:
+      title: リダイレクトエンドポイントのレスポンス
+      description: |-
+        ## 概要
+        - リダイレクトエンドポイントのレスポンスの定義
+      type: object
+      properties:
+        token:
+          description: ID基盤から得られる有効なトークン
+          $ref: "#/components/schemas/tokens"
+        is_signup:
+          description: 新規登録かどうかのフラグ
+          type: boolean
+          example: true
+        is_recoverable:
+          description: ユーザーが復旧可能かどうかのフラグ
+          type: boolean
+          example: true
+      required:
+        - token
+        - is_signup
+        - is_recoverable
+    error_ff:
+      title: ユーザーアプリ用のカスタムエラーのレスポンス
+      description: |-
+        ## 概要
+        - ユーザーアプリ用のカスタムエラーのレスポンスの定義
+
+        ## 詳細
+        - ユーザーアプリ用のカスタムエラーのレスポンスには, 独自定義したcodeとmessageを返す
+      type: object
+      properties:
+        code:
+          description: |-
+            - カスタムエラーコード(1000から始まる4桁の数字)
+            - 1000番台が認証関連のエラー
+            - 2000番台がその他のエラー
+          type: integer
+          format: int32
+          example: 1000
+        message:
+          description: エラーメッセージ
+          type: string
+          example: access_token is expired
+      required:
+        - code
+        - message
+    init_app:
+      title: ユーザーアプリ起動時のエンドポイントのレスポンス
+      description: |-
+        ## 概要
+        - ユーザーアプリ起動時のエンドポイントのレスポンスの定義
+
+        ## 詳細
+        - 強制アップデートのフラグ
+        - 認証済みか否かのフラグ
+        - (認証済みであれば)ID基盤から得られるリフレッシュトークン
+      type: object
+      properties:
+        need_update:
+          description: 強制アップデートのフラグ
+          type: boolean
+        is_authed:
+          description: 認証済みか否かのフラグ
+          type: boolean
+        is_recoverable:
+          description: ユーザーが復旧可能かどうかのフラグ
+          type: boolean
+        token:
+          description: (認証済みであれば)ID基盤から得られる有効なトークン
+          $ref: "#/components/schemas/tokens"
+      required:
+        - need_update
+        - is_authed
+        - is_recoverable
+    refresh_token:
+      title: トークン再発行エンドポイントのレスポンス
+      description: |-
+        ## 概要
+        - トークン再発行エンドポイントのレスポンスの定義
+      type: object
+      properties:
+        token:
+          description: (認証済みであれば)ID基盤から得られる有効なトークン
+          $ref: "#/components/schemas/tokens"
+      required:
+        - token
+    userinfo:
+      title: ID基盤から取得されるユーザー情報
+      description: |-
+        ## 概要
+        - ID基盤から取得されるユーザー情報の定義
+      type: object
+      properties:
+        genda_uuid:
+          type: string
+          description: User's Genda UUID
+        nickname:
+          type: string
+          description: User's nickname
+        given_name:
+          type: string
+          description: User's given name
+        family_name:
+          type: string
+          description: User's family name
+        given_name_kana:
+          type: string
+          description: User's given name in Kana
+        family_name_kana:
+          type: string
+          description: User's family name in Kana
+        picture:
+          type: string
+          description: User's profile picture URL
+        sex:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 9
+          description: User's sex
+        birthdate:
+          type: string
+          format: date
+          description: User's birthdate
+        email:
+          type: string
+          description: User's email address
+        email_verified:
+          type: boolean
+          description: Whether user's email address is verified or not
+        phone_number:
+          type: string
+          description: User's phone number
+        phone_number_verified:
+          type: boolean
+          description: Whether user's phone number is verified or not
+      required:
+        - genda_uuid
+        - nickname
+        - email
+    users_me:
+      title: ユーザーアプリ用にユーザー情報を返すレスポンス
+      description: |-
+        ## 概要
+        - ユーザーアプリ用にユーザー情報を返すレスポンスの定義
+        - ID基盤から取得されるユーザー情報とfanfancyのユーザー情報を結合して返す
+      type: object
+      properties:
+        userinfo:
+          description: ID基盤から取得されるユーザー情報
+          $ref: "#/components/schemas/userinfo"
+        usable_points:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 現在使用可能なポイント数
+        total_purchase_amount:
+          type: integer
+          format: int64
+          minimum: 0
+          description: 累計購入金額
+      required:
+        - userinfo
+        - usable_points
+        - total_purchase_amount
+    users_flower:
+      title: ユーザーの現在のフラワースタンドの情報を返すレスポンス
+      description: |-
+        ## 概要
+        - ユーザーの現在のフラワースタンドの情報を返すレスポンスの定義
+      type: object
+      properties:
+        flower_stand_level:
+          description: フラワースタンドのレベル
+          type: integer
+          format: int32
+          minimum: 1
+        flower_stand_background_img_url:
+          description: フラワースタンドの背景画像のURL
+          type: string
+          format: uri
+        oshi_img_url:
+          description: フラワースタンドに載せている推しの画像のURL
+          type: string
+          format: uri
+        total_purchase_amount:
+          description: 累計購入金額
+          type: integer
+          format: int64
+          minimum: 0
+        n_applications:
+          description: これまでの店舗でのフラスタの申し込み回数
+          type: integer
+          format: int32
+          minimum: 0
+        completeness:
+          description: フラワースタンドの完成度
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+      required:
+        - flower_stand_level
+        - flower_stand_background_img_url
+        - oshi_img_url
+        - total_purchase_amount
+        - n_applications
+        - completeness
+    users_points:
+      title: ユーザーアプリ用にユーザーの現在のポイントを返すレスポンス
+      description: |-
+        ## 概要
+        - ユーザーアプリ用にユーザーの現在のポイントを返すレスポンスの定義
+      type: object
+      properties:
+        usable_points:
+          description: 現在使用可能なポイント数
+          type: integer
+          format: int32
+        point_expiration_date:
+          description: |-
+            - ポイントの有効期限
+            - ポイントの有効期限は、最後にポイントを獲得or使用した日から1年間
+          type: string
+          format: date
+      required:
+        - usable_points
+    points_got:
+      title: ユーザーアプリ用にポイント獲得履歴を返すレスポンス
+      description: |-
+        ## 概要
+        - ユーザーアプリ用にポイント獲得履歴を返すレスポンスの定義
+      type: object
+      properties:
+        reason:
+          description: |-
+            - ポイント獲得の理由
+              - purchase: 購入によるポイント獲得
+          type: string
+          enum:
+            - purchase
+        id:
+          description: ポイント獲得に関するID
+          type: integer
+          format: int64
+        amount:
+          description: 獲得ポイント数
+          type: integer
+          format: int64
+        got_at:
+          description: ポイント獲得日時
+          type: string
+          format: date-time
+      required:
+        - reason
+        - id
+        - amount
+        - got_at
+    points_used:
+      title: ユーザーアプリ用にポイント使用履歴を返すレスポンス
+      description: |-
+        ## 概要
+        - ユーザーアプリ用にポイント使用履歴を返すレスポンスの定義
+      type: object
+      properties:
+        reason:
+          description: |-
+            - ポイント使用の理由
+              - ticket: チケット発行によるポイント使用
+          type: string
+          enum:
+            - ticket
+        id:
+          description: ポイント使用に関するID
+          type: integer
+          format: int64
+        amount:
+          description: 使用ポイント数
+          type: integer
+          format: int64
+        used_at:
+          description: ポイント使用日時
+          type: string
+          format: date-time
+      required:
+        - reason
+        - id
+        - amount
+        - used_at
+    users_points_history:
+      title: ユーザーアプリ用にポイント情報履歴を返すレスポンス
+      description: |-
+        ## 概要
+        - ユーザーアプリ用にポイント情報履歴を返すレスポンスの定義
+      type: object
+      properties:
+        points_got_list:
+          description: ポイント取得履歴の配列
+          type: array
+          items:
+            $ref: "#/components/schemas/points_got"
+        points_used_list:
+          description: ポイント使用履歴の配列
+          type: array
+          items:
+            $ref: "#/components/schemas/points_used"
+        point_expiration_date:
+          description: |-
+            - ポイントの有効期限
+            - ポイントの有効期限は、最後にポイントを獲得or使用した日から1年間
+          type: string
+          format: date
+    users_sales_token:
+      title: ユーザーアプリ用に更新されたユーザーの累計購入金額と使用可能ポイントを返す。
+      description: |-
+        ## 概要
+        - ユーザーアプリ用にユーザーの現在のポイントを返すレスポンスの定義
+      type: object
+      properties:
+        usable_points:
+          description: 現在使用可能なポイント数
+          type: integer
+          format: int32
+        total_purchases_amount:
+          description: 累計購入金額
+          type: integer
+          format: int64
+      required:
+        - usable_points
+        - total_purchases_amount
+    ticket:
+      title: ユーザーアプリ用にチケットの詳細を返すレスポンス
+      description: |-
+        ## 概要
+        - ユーザーアプリ用にチケットの詳細を返すレスポンスの定義
+      type: object
+      properties:
+        ticket_id:
+          description: Ticket ID
+          type: integer
+          format: int64
+        points:
+          description: Needed points to get the ticket
+          type: integer
+          format: int64
+        name:
+          description: Ticket name
+          type: string
+        description:
+          description: Ticket description
+          type: string
+        img_url:
+          description: Ticket image URL
+          type: string
+        available_from:
+          description: When the ticket is available
+          type: string
+          format: date
+        available_to:
+          description: When the ticket is unavailable
+          type: string
+          format: date
+      required:
+        - ticket_id
+        - points
+        - name
+        - description
+        - img_url
+        - available_from
+        - available_to
+    tickets_list:
+      title: ユーザーアプリ用にチケット一覧を返すレスポンス
+      description: |-
+        ## 概要
+        - ユーザーアプリ用にチケット一覧を返すレスポンスの定義
+      type: object
+      properties:
+        tickets_list:
+          description: The list of tickets
+          type: array
+          items:
+            $ref: "#/components/schemas/ticket"
+      required:
+        - tickets_list
+    news_overview:
+      title: ユーザーアプリ用にニュースの概要を返すレスポンス
+      description: |-
+        ## 概要
+        - ユーザーアプリ用にニュースの概要を返すレスポンスの定義
+      type: object
+      properties:
+        news_id:
+          description: News ID
+          type: integer
+          format: int64
+        title:
+          description: News title
+          type: string
+        thumbnail_img_url:
+          description: News thumbnail image URL
+          type: string
+        published_at:
+          description: When the news is to be published
+          type: string
+          format: date-time
+      required:
+        - news_id
+        - title
+        - thumbnail_img_url
+        - published_at
+    news_list:
+      title: ユーザーアプリ用にニュース一覧を返すレスポンス
+      description: |-
+        ## 概要
+        - ユーザーアプリ用にニュースの一覧を返すレスポンスの定義
+      type: object
+      properties:
+        news_list:
+          description: The list of news
+          type: array
+          items:
+            $ref: "#/components/schemas/news_overview"
+      required:
+        - news_list
+    news_detail:
+      title: ユーザーアプリ用にニュースの詳細を返すレスポンス
+      description: |-
+        ## 概要
+        - ユーザーアプリ用にニュースの詳細を返すレスポンスの定義
+      type: object
+      properties:
+        news_id:
+          description: News ID
+          type: integer
+          format: int64
+        title:
+          description: News title
+          type: string
+        thumbnail_img_url:
+          description: News thumbnail image URL
+          type: string
+        message:
+          description: News contents text
+          type: string
+        link_url:
+          description: News details URL
+          type: string
+        link_message:
+          description: Text of link with news details URL
+          type: string
+        img_url:
+          description: News image URL
+          type: string
+        push_title:
+          description: Title of push notify
+          type: string
+        push_message:
+          description: Message of push notify
+          type: string
+        published_at:
+          description: When the news is to be published
+          type: string
+          format: date-time
+      required:
+        - news_id
+        - title
+        - thumbnail_img_url
+        - message
+        - link_url
+        - link_message
+        - img_url
+        - push_title
+        - push_message
+        - published_at
+    shop:
+      title: ユーザーアプリ用に店舗情報を返すレスポンス
+      description: |-
+        ## 概要
+        - ユーザーアプリ用に店舗情報を返すレスポンスの定義
+      type: object
+      properties:
+        shop_name:
+          description: Shop name
+          type: string
+        address:
+          description: Shop adress
+          type: string
+        description:
+          description: Shop description and access information, etc
+          type: string
+        img_url:
+          description: Shop image URL
+          type: string
+        link_url:
+          description: Shop HP URL
+          type: string
+      required:
+        - shop_name
+        - address
+        - description
+        - img_url
+        - link_url
+    shops_list:
+      title: ユーザーアプリ用に店舗一覧を返すレスポンス
+      description: |-
+        ## 概要
+        - ユーザーアプリ用に店舗一覧を返すレスポンスの定義
+      type: object
+      properties:
+        shops_list:
+          description: The list of shops
+          type: array
+          items:
+            $ref: "#/components/schemas/shop"
+      required:
+        - shops_list
+    operator_detail:
+      type: object
+      title: Operator's detail information.
+      properties:
+        operator_id:
+          description: Operator ID.
+          type: integer
+          format: int64
+        email:
+          description: Operator email.
+          type: string
+        operator_role_id:
+          description: Operator role ID.
+          type: integer
+          format: int64
+        created_at:
+          description: When User created.
+          type: string
+          format: date-time
+        updated_at:
+          description: When User last updated.
+          type: string
+          format: date-time
+    operators_list:
+      type: object
+      title: Operators information list.
+      properties:
+        operators:
+          description: The list of operators.
+          type: array
+          items:
+            $ref: "#/components/schemas/operator_detail"
+    ticket_admin:
+      type: object
+      title: Ticket information.
+      properties:
+        ticket_id:
+          description: Ticket ID.
+          type: integer
+          format: int64
+        points:
+          description: Needed points to get the ticket.
+          type: integer
+          format: int64
+        name:
+          description: Ticket name.
+          type: string
+        description:
+          description: Ticket description.
+          type: string
+        img_url:
+          description: Ticket image URL.
+          type: string
+        available_from:
+          description: When the ticket is available.
+          type: string
+          format: date
+        available_to:
+          description: When the ticket is unavailable.
+          type: string
+          format: date
+    tickets_list_admin:
+      type: object
+      title: Tickets information list.
+      properties:
+        tickets_list:
+          description: The list of tickets.
+          type: array
+          items:
+            $ref: "#/components/schemas/ticket_admin"
+    ticket_request:
+      type: object
+      title: Ticket request information.
+      properties:
+        points:
+          description: Needed points to get the ticket.
+          type: integer
+          format: int64
+        name:
+          description: Ticket name.
+          type: string
+        description:
+          description: Ticket description.
+          type: string
+        img_url:
+          description: Ticket image URL.
+          type: string
+        available_from:
+          description: When the ticket is available.
+          type: string
+          format: date
+        available_to:
+          description: When the ticket is unavailable.
+          type: string
+          format: date
+    news_admin:
+      type: object
+      title: News information.
+      properties:
+        news_id:
+          description: News ID.
+          type: integer
+          format: int64
+        title:
+          description: News title.
+          type: string
+        thumbnail_img_url:
+          description: News thumbnail image URL.
+          type: string
+        message:
+          description: News contents text.
+          type: string
+        link_url:
+          description: News details URL.
+          type: string
+        link_message:
+          description: Text of link with news details URL.
+          type: string
+        img_url:
+          description: News image URL.
+          type: string
+        push_title:
+          description: Title of push notify.
+          type: string
+        push_message:
+          description: Message of push notify.
+          type: string
+        published_at:
+          description: When the news is to be published.
+          type: string
+          format: date-time
+    news_list_admin:
+      type: object
+      title: News information list.
+      properties:
+        news_list:
+          description: The list of news.
+          type: array
+          items:
+            $ref: "#/components/schemas/news_admin"
+    news_request:
+      type: object
+      title: News request information.
+      properties:
+        title:
+          description: News title.
+          type: string
+        thumbnail_img_url:
+          description: News thumbnail image URL.
+          type: string
+        message:
+          description: News contents text.
+          type: string
+        link_url:
+          description: News details URL.
+          type: string
+        link_message:
+          description: Text of link with news details URL.
+          type: string
+        img_url:
+          description: News image URL.
+          type: string
+        push_title:
+          description: Title of push notify.
+          type: string
+        push_message:
+          description: Message of push notify.
+          type: string
+        published_at:
+          description: When the news is to be published.
+          type: string
+          format: date-time
+  responses:
+    error_admin_unexpected:
+      description: Unexpected error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/error_admin"
+    error_app_unexpected:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/error_app"
+    error_app_authn_401:
+      description: |-
+        - アクセストークンの期限が切れている, もしくは不適切な場合, エラーコード: 1000
+        - リフレッシュトークンの期限が切れている, もしくは不適切な場合, エラーコード: 1001
+        - IDトークン検証時のエラーの場合, エラーコード: 1002 ~
+        - セッション認証周りのエラーの場合, エラーコード: 1100 ~
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/error_ff"
