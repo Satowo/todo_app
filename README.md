@@ -1,6 +1,20 @@
 # 環境構築
 
-## 1. パッケージのインストール
+## 1. レポジトリのクローン
+
+- ssh
+
+```bash
+git clone git@github.com:Satowo/todo_app.git
+```
+
+- http
+
+```bash
+git clone https://github.com/Satowo/todo_app.git
+```
+
+## 2. パッケージのインストール
 
 まず最初に開発に必要な以下のコマンドをインストールする.
 
@@ -9,7 +23,7 @@
 - [mysql](https://dev.mysql.com/doc/refman/8.0/ja/mysql.html)
 - [go](https://golang.org/doc/install)
 
-## 2. .env ファイルの作成
+## 3. .env ファイルの作成
 
 .env ファイルを作成する.中身の値は吉田に聞いてください
 
@@ -30,7 +44,7 @@ make run-seed
 
 このコマンドは何度も実行できるので, 予期せぬエラーが発生したり, データベースの値を変えたりした場合には再度実行する. -->
 
-## 3. サーバーを起動する
+## 4. サーバーを起動する
 
 ```bash
 make start
@@ -42,6 +56,6 @@ make start
 curl -v http://localhost:1324/api/health
 ``` -->
 
-## 4. API 定義書を確認（作成途中）
+## 5. API 定義書を確認（作成途中）
 
 http://localhost:8082 にアクセスして swagger UI が立ち上がるか確認する
