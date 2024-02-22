@@ -30,7 +30,7 @@ make run-seed
 
 このコマンドは何度も実行できるので, 予期せぬエラーが発生したり, データベースの値を変えたりした場合には再度実行する. -->
 
-## 4. サーバーを起動する
+## 3. サーバーを起動する
 
 ```bash
 make start
@@ -41,3 +41,7 @@ make start
 ```bash
 curl -v http://localhost:1324/api/health
 ``` -->
+
+## 4. API 定義書を確認（作成途中）
+
+http://localhost:8082 にアクセスして swagger UI が立ち上がるか確認する
