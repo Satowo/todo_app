@@ -1,0 +1,14 @@
+title: ボード一覧取得レスポンス
+description: |-
+  ## 概要
+  - ボード一覧取得のレスポンス定義
+
+type: object
+properties:
+  boards_list:
+    description: The list of boards
+    type: array
+    items:
+      $ref: "./entity/board.yml"
+required:
+  - boards_list

@@ -9,7 +9,7 @@ services:
       dockerfile: ./docker/Dockerfile.air
     env_file: .env
     ports:
-      - 1000:${API_PORT_CONTAINER}
+      - 3030:${API_PORT_CONTAINER}
     volumes:
       - type: bind
         source: .
@@ -29,7 +29,7 @@ services:
       MYSQL_DATABASE: ${MYSQL_DB}
       TZ: Asia/Tokyo
     ports:
-      - 3308:${MYSQL_PORT}
+      - 3305:${MYSQL_PORT}
     volumes:
       - type: volume
         source: todo-app-db

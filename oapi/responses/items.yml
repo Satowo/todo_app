@@ -1,0 +1,14 @@
+title: アイテム一覧取得レスポンス
+description: |-
+  ## 概要
+  - アイテム一覧取得のレスポンス定義
+
+type: object
+properties:
+  items_list:
+    description: The list of items
+    type: array
+    items:
+      $ref: "./entity/item.yml"
+required:
+  - items_list

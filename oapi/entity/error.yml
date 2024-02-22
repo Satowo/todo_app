@@ -1,0 +1,16 @@
+title: Not foundエラーレスポンス
+description: |-
+  ## 概要
+  - Not foundエラーレスポンスの定義
+
+  ## 詳細
+  - 取得したいデータがDBに存在しなかったときのレスポンス
+
+type: object
+properties:
+  message:
+    description: not foundエラーメッセージ
+    type: string
+    example: Not Found
+required:
+  - message

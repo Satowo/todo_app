@@ -1,0 +1,39 @@
+title: Board
+description: |-
+  ## 概要
+  - ボードのエンティティ
+
+type: object
+properties:
+  id:
+    description: board id
+    type: integer
+    format: int64
+  board_id:
+    description: board id that list belongs to
+    type: integer
+    format: int64
+  list_id:
+    description: list id that item belongs to
+    type: integer
+    format: int64
+  title:
+    description: board title
+    type: string
+  content:
+    description: item content
+    type: string
+  expired_at:
+    description: item expired date
+    type: string
+    format: date-time
+  archived:
+    description: board is archived or not
+    type: string
+required:
+  - id
+  - board_id
+  - list_id
+  - title
+  - content
+  - archived

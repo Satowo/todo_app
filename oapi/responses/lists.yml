@@ -1,0 +1,14 @@
+title: リスト一覧取得レスポンス
+description: |-
+  ## 概要
+  - リスト一覧取得のレスポンス定義
+
+type: object
+properties:
+  lists_list:
+    description: The list of lists
+    type: array
+    items:
+      $ref: "./entity/list.yml"
+required:
+  - lists_list

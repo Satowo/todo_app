@@ -1,0 +1,7 @@
+title: 疎通確認レスポンス
+description: |-
+  ## 概要
+  - サーバーの状態を返す
+  - 問題なければOKを返す
+type: string
+example: OK

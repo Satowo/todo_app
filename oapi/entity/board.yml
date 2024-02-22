@@ -1,0 +1,21 @@
+title: Board
+description: |-
+  ## 概要
+  - ボードのエンティティ
+
+type: object
+properties:
+  id:
+    description: board id
+    type: integer
+    format: int64
+  title:
+    description: board title
+    type: string
+  archived:
+    description: board is archived or not
+    type: string
+required:
+  - id
+  - title
+  - archived
