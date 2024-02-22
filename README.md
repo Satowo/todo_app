@@ -25,7 +25,8 @@ git clone https://github.com/Satowo/todo_app.git
 
 ## 3. .env ファイルの作成
 
-.env ファイルを作成する.中身の値は吉田に聞いてください
+ルートディレクトに.env ファイルを作成する.
+（中身の値は吉田に聞いてください）
 
 <!-- ## 3. DB の初期値を投入する
 
@@ -58,4 +59,4 @@ curl -v http://localhost:1324/api/health
 
 ## 5. API 定義書を確認（作成途中）
 
-http://localhost:8082 にアクセスして swagger UI が立ち上がるか確認する
+http://localhost:8082 にアクセスして swagger UI が立ち上がるか確認する.
