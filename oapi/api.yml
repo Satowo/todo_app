@@ -97,6 +97,14 @@ paths:
         - boards
       operationId: updateBoard
       security: []
+      parameters:
+        - name: board_id
+          in: path
+          description: 更新するボードのID
+          required: true
+          schema:
+            type: integer
+            example: 1
       requestBody:
         description: 更新するボード
         required: true
@@ -129,12 +137,20 @@ paths:
         - boards
       operationId: deleteBoard
       security: []
+      parameters:
+        - name: board_id
+          in: path
+          description: 削除するボードのID
+          required: true
+          schema:
+            type: integer
+            example: 1
       responses:
         "204":
           description: Successfully delete a board
         default:
           $ref: "./errors/unexpected.yml"
-  /categories/{board_id}:
+  /categories:
     get:
       summary: 特定のボード内のカテゴリ一覧を取得するエンドポイント
       description: |-
@@ -144,6 +160,14 @@ paths:
         - categories
       operationId: getCategories
       security: []
+      parameters:
+        - name: board_id
+          in: query
+          description: カテゴリ一覧を取得するボードのID
+          required: true
+          schema:
+            type: integer
+            example: 1
       responses:
         "200":
           description: 特定のボード内のカテゴリを全て返す
@@ -162,6 +186,14 @@ paths:
         - categories
       operationId: createCategories
       security: []
+      parameters:
+        - name: board_id
+          in: query
+          description: カテゴリ一覧を取得するボードのID
+          required: true
+          schema:
+            type: integer
+            example: 1
       requestBody:
         description: 新規作成するカテゴリ
         required: true
@@ -170,11 +202,16 @@ paths:
             schema:
               type: object
               properties:
+                board_id:
+                  type: integer
+                  description: 新規作成するカテゴリのボードID
+                  example: 1
                 category_title:
                   type: string
                   description: 新規作成するカテゴリのタイトル
                   example: TODO
               required:
+                - board_id
                 - category_title
       responses:
         "201":
@@ -195,6 +232,14 @@ paths:
         - categories
       operationId: updateCategory
       security: []
+      parameters:
+        - name: category_id
+          in: path
+          description: 更新するカテゴリのID
+          required: true
+          schema:
+            type: integer
+            example: 1
       requestBody:
         description: 更新するカテゴリ
         required: true
@@ -227,12 +272,20 @@ paths:
         - categories
       operationId: deleteCategory
       security: []
+      parameters:
+        - name: category_id
+          in: path
+          description: 削除するカテゴリのID
+          required: true
+          schema:
+            type: integer
+            example: 1
       responses:
         "204":
           description: Successfully delete a category
         default:
           $ref: "./errors/unexpected.yml"
-  /items/{category_id}:
+  /items:
     get:
       summary: カテゴリ内のアイテム一覧を取得するエンドポイント
       description: |-
@@ -242,6 +295,14 @@ paths:
         - items
       operationId: getItems
       security: []
+      paramter:
+        - name: category_id
+          in: query
+          description: アイテム一覧を取得するカテゴリのID
+          required: true
+          schema:
+            type: integer
+            example: 1
       responses:
         "200":
           description: 特定のカテゴリ内のアイテムを全て返す
@@ -249,5 +310,140 @@ paths:
             application/json:
               schema:
                 $ref: "./responses/items.yml"
+        default:
+          $ref: "./errors/unexpected.yml"
+    post:
+      summary: アイテムを新規作成するエンドポイント
+      description: |-
+        ## 概要
+        - 新規のアイテム情報を受け取り、新規作成したアイテム情報を返す
+      tags:
+        - items
+      operationId: createItem
+      security: []
+      parameters:
+        - name: category_id
+          in: query
+          description: 新規作成するアイテムのカテゴリID
+          required: true
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        description: 新規作成するアイテム
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                board_id:
+                  type: integer
+                  description: 新規作成するアイテムのボードID
+                  example: 1
+                list_id:
+                  type: integer
+                  description: 新規作成するアイテムのリストID
+                  example: 1
+                item_title:
+                  type: string
+                  description: 新規作成するアイテムのタイトル
+                  example: TODO
+                content:
+                  type: string
+                  description: 新規作成するアイテムの内容
+                  example: "TODOの内容"
+                expired_at:
+                  type: string
+                  description: 新規作成するアイテムの期限
+                  format: date-time
+                  example: "2021-01-01 00:00:00"
+              required:
+                - board_id
+                - list_id
+                - item_title
+                - content
+                - expired_at
+      responses:
+        "201":
+          description: Successfully create a new item
+          content:
+            application/json:
+              schema:
+                $ref: "./entity/item.yml"
+        default:
+          $ref: "./errors/unexpected.yml"
+  /items/{item_id}:
+    put:
+      summary: アイテム情報を更新するエンドポイント
+      description: |-
+        ## 概要
+        - アイテム情報を受け取り、更新したアイテム情報を返す
+      tags:
+        - items
+      operationId: updateItem
+      security: []
+      parameters:
+        - name: item_id
+          in: path
+          description: 更新するアイテムのID
+          required: true
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        description: 更新するアイテム
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                item_title:
+                  type: string
+                  description: 更新するアイテムのタイトル
+                  example: TODO
+                content:
+                  type: string
+                  description: 更新するアイテムの内容
+                  example: "TODOの内容"
+                expired_at:
+                  type: string
+                  description: 更新するアイテムの期限
+                  format: date-time
+                  example: "2021-01-01 00:00:00"
+              required:
+                - item_title
+                - content
+                - expired_at
+      responses:
+        "200":
+          description: Successfully update an item
+          content:
+            application/json:
+              schema:
+                $ref: "./entity/item.yml"
+        default:
+          $ref: "./errors/unexpected.yml"
+    delete:
+      summary: アイテムをアーカイブするエンドポイント
+      description: |-
+        ## 概要
+        - アイテムIDを受け取り、アイテムをアーカイブする
+      tags:
+        - items
+      operationId: archiveItem
+      security: []
+      parameters:
+        - name: item_id
+          in: path
+          description: アーカイブするアイテムのID
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "204":
+          description: Successfully archive an item
         default:
           $ref: "./errors/unexpected.yml"
