@@ -19,6 +19,11 @@ properties:
   archived:
     description: list is archived or not
     type: string
+example:
+  id: 1
+  board_id: 1
+  title: "list title"
+  archived: "false"
 required:
   - id
   - title

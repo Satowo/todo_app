@@ -48,45 +48,203 @@ paths:
       security: []
       responses:
         "200":
-          description: ボード一覧のリストを返す
+          description: 全てのボードを返す
           content:
             application/json:
               schema:
                 $ref: "./responses/boards.yml"
         default:
           $ref: "./errors/unexpected.yml"
-  /lists:
-    get:
-      summary: リスト一覧を取得するエンドポイント
+    post:
+      summary: ボードを新規作成するエンドポイント
       description: |-
         ## 概要
-        - リスト一覧を取得する
+        - ボードのタイトルを受け取り、新規作成したボード情報を返す
+      tags:
+        - boards
+      operationId: createBoard
+      security: []
+      requestBody:
+        description: 新規作成するボード
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                board_title:
+                  type: string
+                  description: 新規作成するボードのタイトル
+                  example: UTTC
+              required:
+                - board_title
+      responses:
+        "201":
+          description: Successfully create a new board
+          content:
+            application/json:
+              schema:
+                $ref: "./responses/board.yml"
+        default:
+          $ref: "./errors/unexpected.yml"
+  /boards/{board_id}:
+    put:
+      summary: ボードタイトルを更新するエンドポイント
+      description: |-
+        ## 概要
+        - ボードのタイトルを受け取り、更新したボード情報を返す
+      tags:
+        - boards
+      operationId: updateBoard
+      security: []
+      requestBody:
+        description: 更新するボード
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                board_title:
+                  type: string
+                  description: 更新するボードのタイトル
+                  example: UTTC
+              required:
+                - board_title
+      responses:
+        "200":
+          description: Successfully update a board
+          content:
+            application/json:
+              schema:
+                $ref: "./responses/board.yml"
+        default:
+          $ref: "./errors/unexpected.yml"
+    delete:
+      summary: ボードを削除するエンドポイント
+      description: |-
+        ## 概要
+        - ボードIDを受け取り、ボードを削除する
+      tags:
+        - boards
+      operationId: deleteBoard
+      security: []
+      responses:
+        "204":
+          description: Successfully delete a board
+        default:
+          $ref: "./errors/unexpected.yml"
+  /lists/{board_id}:
+    get:
+      summary: 特定のボード内のリスト一覧を取得するエンドポイント
+      description: |-
+        ## 概要
+        - 特定のボード内のリスト一覧を取得する
       tags:
         - lists
       operationId: getLists
       security: []
       responses:
         "200":
-          description: リスト一覧のリストを返す
+          description: 特定のボード内のリストを全て返す
           content:
             application/json:
               schema:
                 $ref: "./responses/lists.yml"
         default:
           $ref: "./errors/unexpected.yml"
-  /items:
-    get:
-      summary: アイテム一覧を取得するエンドポイント
+    post:
+      summary: リストを新規作成するエンドポイント
       description: |-
         ## 概要
-        - アイテム一覧を取得する
+        - リストのタイトルを受け取り、新規作成したリスト情報を返す
+      tags:
+        - lists
+      operationId: createList
+      security: []
+      requestBody:
+        description: 新規作成するリスト
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                list_title:
+                  type: string
+                  description: 新規作成するリストのタイトル
+                  example: TODO
+              required:
+                - list_title
+      responses:
+        "201":
+          description: Successfully create a new list
+          content:
+            application/json:
+              schema:
+                $ref: "./entity/list.yml"
+        default:
+          $ref: "./errors/unexpected.yml"
+  /lists/{list_id}:
+    put:
+      summary: リストタイトルを更新するエンドポイント
+      description: |-
+        ## 概要
+        - リストのタイトルを受け取り、更新したリスト情報を返す
+      tags:
+        - lists
+      operationId: updateList
+      security: []
+      requestBody:
+        description: 更新するリスト
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                list_title:
+                  type: string
+                  description: 更新するリストのタイトル
+                  example: TODO
+              required:
+                - list_title
+      responses:
+        "200":
+          description: Successfully update a list
+          content:
+            application/json:
+              schema:
+                $ref: "./entity/list.yml"
+        default:
+          $ref: "./errors/unexpected.yml"
+    delete:
+      summary: リストを削除するエンドポイント
+      description: |-
+        ## 概要
+        - リストIDを受け取り、リストを削除する
+      tags:
+        - lists
+      operationId: deleteList
+      security: []
+      responses:
+        "204":
+          description: Successfully delete a list
+        default:
+          $ref: "./errors/unexpected.yml"
+  /items/{list_id}:
+    get:
+      summary: リスト内のアイテム一覧を取得するエンドポイント
+      description: |-
+        ## 概要
+        - 特定のリスト内のアイテム一覧を取得する
       tags:
         - items
       operationId: getItems
       security: []
       responses:
         "200":
-          description: アイテム一覧のリストを返す
+          description: 特定のリスト内のアイテムを全て返す
           content:
             application/json:
               schema:

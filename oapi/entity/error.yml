@@ -11,6 +11,6 @@ properties:
   message:
     description: not foundエラーメッセージ
     type: string
-    example: Not Found
+    example: Internal Server Error
 required:
   - message
