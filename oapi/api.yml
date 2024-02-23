@@ -87,8 +87,8 @@ paths:
                 $ref: "./responses/board.yml"
         default:
           $ref: "./errors/unexpected.yml"
-  /boards/{board_id}:
-    put:
+  /boards/update/{board_id}:
+    post:
       summary: ボードタイトルを更新するエンドポイント
       description: |-
         ## 概要
@@ -128,7 +128,8 @@ paths:
                 $ref: "./responses/board.yml"
         default:
           $ref: "./errors/unexpected.yml"
-    delete:
+  /boards/delete/{board_id}:
+    post:
       summary: ボードを削除するエンドポイント
       description: |-
         ## 概要
@@ -222,8 +223,8 @@ paths:
                 $ref: "./entity/category.yml"
         default:
           $ref: "./errors/unexpected.yml"
-  /categories/{category_id}:
-    put:
+  /categories/update/{category_id}:
+    post:
       summary: カテゴリタイトルを更新するエンドポイント
       description: |-
         ## 概要
@@ -263,7 +264,8 @@ paths:
                 $ref: "./entity/category.yml"
         default:
           $ref: "./errors/unexpected.yml"
-    delete:
+  /categories/delete/{category_id}:
+    post:
       summary: カテゴリを削除するエンドポイント
       description: |-
         ## 概要
@@ -373,8 +375,8 @@ paths:
                 $ref: "./entity/item.yml"
         default:
           $ref: "./errors/unexpected.yml"
-  /items/{item_id}:
-    put:
+  /items/update/{item_id}:
+    post:
       summary: アイテム情報を更新するエンドポイント
       description: |-
         ## 概要
@@ -425,7 +427,8 @@ paths:
                 $ref: "./entity/item.yml"
         default:
           $ref: "./errors/unexpected.yml"
-    delete:
+  /items/archive/{item_id}:
+    post:
       summary: アイテムをアーカイブするエンドポイント
       description: |-
         ## 概要
