@@ -12,8 +12,8 @@ tags:
     description: 疎通確認エンドポイント
   - name: boards
     description: ボード関連エンドポイント
-  - name: lists
-    description: リスト関連エンドポイント
+  - name: categories
+    description: カテゴリ関連エンドポイント
   - name: items
     description: アイテム関連エンドポイント
 paths:
@@ -134,117 +134,117 @@ paths:
           description: Successfully delete a board
         default:
           $ref: "./errors/unexpected.yml"
-  /lists/{board_id}:
+  /categories/{board_id}:
     get:
-      summary: 特定のボード内のリスト一覧を取得するエンドポイント
+      summary: 特定のボード内のカテゴリ一覧を取得するエンドポイント
       description: |-
         ## 概要
-        - 特定のボード内のリスト一覧を取得する
+        - 特定のボード内のカテゴリ一覧を取得する
       tags:
-        - lists
-      operationId: getLists
+        - categories
+      operationId: getCategories
       security: []
       responses:
         "200":
-          description: 特定のボード内のリストを全て返す
+          description: 特定のボード内のカテゴリを全て返す
           content:
             application/json:
               schema:
-                $ref: "./responses/lists.yml"
+                $ref: "./responses/categories.yml"
         default:
           $ref: "./errors/unexpected.yml"
     post:
-      summary: リストを新規作成するエンドポイント
+      summary: カテゴリを新規作成するエンドポイント
       description: |-
         ## 概要
-        - リストのタイトルを受け取り、新規作成したリスト情報を返す
+        - カテゴリのタイトルを受け取り、新規作成したカテゴリ情報を返す
       tags:
-        - lists
-      operationId: createList
+        - categories
+      operationId: createCategories
       security: []
       requestBody:
-        description: 新規作成するリスト
+        description: 新規作成するカテゴリ
         required: true
         content:
           application/json:
             schema:
               type: object
               properties:
-                list_title:
+                category_title:
                   type: string
-                  description: 新規作成するリストのタイトル
+                  description: 新規作成するカテゴリのタイトル
                   example: TODO
               required:
-                - list_title
+                - category_title
       responses:
         "201":
-          description: Successfully create a new list
+          description: Successfully create a new category
           content:
             application/json:
               schema:
-                $ref: "./entity/list.yml"
+                $ref: "./entity/category.yml"
         default:
           $ref: "./errors/unexpected.yml"
-  /lists/{list_id}:
+  /categories/{category_id}:
     put:
-      summary: リストタイトルを更新するエンドポイント
+      summary: カテゴリタイトルを更新するエンドポイント
       description: |-
         ## 概要
-        - リストのタイトルを受け取り、更新したリスト情報を返す
+        - カテゴリのタイトルを受け取り、更新したカテゴリ情報を返す
       tags:
-        - lists
-      operationId: updateList
+        - categories
+      operationId: updateCategory
       security: []
       requestBody:
-        description: 更新するリスト
+        description: 更新するカテゴリ
         required: true
         content:
           application/json:
             schema:
               type: object
               properties:
-                list_title:
+                category_title:
                   type: string
-                  description: 更新するリストのタイトル
+                  description: 更新するカテゴリのタイトル
                   example: TODO
               required:
-                - list_title
+                - category_title
       responses:
         "200":
-          description: Successfully update a list
+          description: Successfully update a category
           content:
             application/json:
               schema:
-                $ref: "./entity/list.yml"
+                $ref: "./entity/category.yml"
         default:
           $ref: "./errors/unexpected.yml"
     delete:
-      summary: リストを削除するエンドポイント
+      summary: カテゴリを削除するエンドポイント
       description: |-
         ## 概要
-        - リストIDを受け取り、リストを削除する
+        - カテゴリIDを受け取り、カテゴリを削除する
       tags:
-        - lists
-      operationId: deleteList
+        - categories
+      operationId: deleteCategory
       security: []
       responses:
         "204":
-          description: Successfully delete a list
+          description: Successfully delete a category
         default:
           $ref: "./errors/unexpected.yml"
-  /items/{list_id}:
+  /items/{category_id}:
     get:
-      summary: リスト内のアイテム一覧を取得するエンドポイント
+      summary: カテゴリ内のアイテム一覧を取得するエンドポイント
       description: |-
         ## 概要
-        - 特定のリスト内のアイテム一覧を取得する
+        - 特定のカテゴリ内のアイテム一覧を取得する
       tags:
         - items
       operationId: getItems
       security: []
       responses:
         "200":
-          description: 特定のリスト内のアイテムを全て返す
+          description: 特定のカテゴリ内のアイテムを全て返す
           content:
             application/json:
               schema:
