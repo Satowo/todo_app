@@ -1,0 +1,11 @@
+title: ボード作成、更新レスポンス
+description: |-
+  ## 概要
+  - ボード作成、更新のレスポンス定義
+
+schema:
+  $ref: "../entity/board.yml"
+example:
+  id: 1
+  title: "board title"
+  deleted: false

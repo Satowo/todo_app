@@ -1,0 +1,20 @@
+title: カテゴリ一覧取得レスポンス
+description: |-
+  ## 概要
+  - カテゴリ一覧取得のレスポンス定義
+
+type: object
+properties:
+  categories_list:
+    description: The list of categories
+    type: array
+    items:
+      $ref: "./entity/category.yml"
+      example:
+        id: 1
+        board_id: 1
+        title: "category title"
+        content: "category content"
+        deleted: false
+required:
+  - categories_list

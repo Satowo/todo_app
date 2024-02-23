@@ -1,0 +1,26 @@
+title: category
+description: |-
+  ## 概要
+  - カテゴリのエンティティ
+
+type: object
+properties:
+  id:
+    description: category id
+    type: integer
+    format: int64
+  board_id:
+    description: board id that category belongs to
+    type: integer
+    format: int64
+  title:
+    description: category title
+    type: string
+  deleted:
+    description: category is deleted or not
+    type: boolean
+    default: false
+required:
+  - id
+  - title
+  - archived

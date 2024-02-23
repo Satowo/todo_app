@@ -1,0 +1,13 @@
+title: カテゴリ作成、更新レスポンス
+description: |-
+  ## 概要
+  - カテゴリ作成、更新のレスポンス定義
+
+schema:
+  $ref: "../entity/category.yml"
+example:
+  id: 1
+  board_id: 1
+  title: "category title"
+  content: "category content"
+  deleted: false

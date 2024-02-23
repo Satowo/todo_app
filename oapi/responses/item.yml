@@ -1,0 +1,15 @@
+title: アイテム作成、更新レスポンス
+description: |-
+  ## 概要
+  - アイテム作成、更新のレスポンス定義
+
+schema:
+  $ref: "../entity/item.yml"
+example:
+  id: 1
+  board_id: 1
+  list_id: 1
+  title: "item title"
+  content: "item content"
+  expired_at: "2021-01-01 00:00:00"
+  archived: false

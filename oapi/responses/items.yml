@@ -10,5 +10,13 @@ properties:
     type: array
     items:
       $ref: "./entity/item.yml"
+      example:
+        id: 1
+        board_id: 1
+        list_id: 1
+        title: "item title"
+        content: "item content"
+        expired_at: "2021-01-01 00:00:00"
+        archived: false
 required:
   - items_list

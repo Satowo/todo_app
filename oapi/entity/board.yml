@@ -1,4 +1,4 @@
-title: Board
+title: board
 description: |-
   ## 概要
   - ボードのエンティティ
@@ -12,9 +12,10 @@ properties:
   title:
     description: board title
     type: string
-  archived:
+  deleted:
     description: board is archived or not
-    type: string
+    type: boolean
+    default: false
 required:
   - id
   - title
