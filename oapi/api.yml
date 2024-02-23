@@ -450,3 +450,26 @@ paths:
           description: Successfully archive an item
         default:
           $ref: "./errors/unexpected.yml"
+  /items/unarchive/{item_id}:
+    post:
+      summary: アイテムをアーカイブ解除するエンドポイント
+      description: |-
+        ## 概要
+        - アイテムIDを受け取り、アイテムをアーカイブ解除する
+      tags:
+        - items
+      operationId: unarchiveItem
+      security: []
+      parameters:
+        - name: item_id
+          in: path
+          description: アーカイブ解除するアイテムのID
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "204":
+          description: Successfully unarchive an item
+        default:
+          $ref: "./errors/unexpected.yml"
