@@ -1,5 +1,10 @@
 # 環境構築
 
+## 0. Go の環境構築
+
+Go をインストールしていない場合は
+[こちら](https://zenn.dev/777kkk/books/bb6b650b7ba677/viewer/045ce9)を参考に Go のインストール、PATH を通す
+
 ## 1. レポジトリのクローン
 
 - ssh
