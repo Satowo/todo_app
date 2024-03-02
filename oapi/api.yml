@@ -5,7 +5,7 @@ info:
     ## 概要
     - todo-appのAPI仕様書
 servers:
-  - url: http://localhost:3030
+  - url: http://localhost:8083
     description: ローカル開発環境
 tags:
   - name: healthcheck
@@ -87,7 +87,7 @@ paths:
                 $ref: "./responses/board.yml"
         default:
           $ref: "./errors/unexpected.yml"
-  /boards/update/{board_id}:
+  /boards/{board_id}:
     post:
       summary: ボードタイトルを更新するエンドポイント
       description: |-
@@ -128,8 +128,7 @@ paths:
                 $ref: "./responses/board.yml"
         default:
           $ref: "./errors/unexpected.yml"
-  /boards/delete/{board_id}:
-    post:
+    delete:
       summary: ボードを削除するエンドポイント
       description: |-
         ## 概要
@@ -223,7 +222,7 @@ paths:
                 $ref: "./entity/category.yml"
         default:
           $ref: "./errors/unexpected.yml"
-  /categories/update/{category_id}:
+  /categories/{category_id}:
     post:
       summary: カテゴリタイトルを更新するエンドポイント
       description: |-
@@ -264,8 +263,7 @@ paths:
                 $ref: "./entity/category.yml"
         default:
           $ref: "./errors/unexpected.yml"
-  /categories/delete/{category_id}:
-    post:
+    delete:
       summary: カテゴリを削除するエンドポイント
       description: |-
         ## 概要
@@ -375,8 +373,8 @@ paths:
                 $ref: "./entity/item.yml"
         default:
           $ref: "./errors/unexpected.yml"
-  /items/update/{item_id}:
-    post:
+  /items/{item_id}:
+    put:
       summary: アイテム情報を更新するエンドポイント
       description: |-
         ## 概要
@@ -427,7 +425,6 @@ paths:
                 $ref: "./entity/item.yml"
         default:
           $ref: "./errors/unexpected.yml"
-  /items/archive/{item_id}:
     post:
       summary: アイテムをアーカイブするエンドポイント
       description: |-
@@ -450,7 +447,7 @@ paths:
           description: Successfully archive an item
         default:
           $ref: "./errors/unexpected.yml"
-  /items/unarchive/{item_id}:
+  /items/archived/{item_id}:
     post:
       summary: アイテムをアーカイブ解除するエンドポイント
       description: |-

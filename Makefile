@@ -1,2 +1,2 @@
 start:
-	docker compose up
+	docker compose up -d && air -c .air.toml

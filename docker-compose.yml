@@ -1,35 +1,16 @@
 version: "3.1"
 
 services:
-  api:
-    container_name: todo-api
-    image: todo-app-api-air
-    build:
-      context: .
-      dockerfile: ./docker/Dockerfile.air
-    env_file: .env
-    ports:
-      - 3030:${API_PORT_CONTAINER}
-    volumes:
-      - type: bind
-        source: .
-        target: /app
-      - type: bind
-        source: ./oapi/api.yml
-        target: /app/oapi/api.yml
-    depends_on:
-      - db
   db:
     container_name: todo-mysql
     image: mysql:8.1
-    command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DB}
       TZ: Asia/Tokyo
     ports:
-      - 3305:${MYSQL_PORT}
+      - ${MYSQL_PORT}:3306
     volumes:
       - type: volume
         source: todo-app-db
