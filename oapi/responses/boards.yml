@@ -9,6 +9,6 @@ properties:
     description: The list of boards
     type: array
     items:
-      $ref: "./entity/board.yml"
+      $ref: "../entity/board.yml"
 required:
   - boards_list

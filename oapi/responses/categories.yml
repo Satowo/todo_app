@@ -9,7 +9,7 @@ properties:
     description: The list of categories
     type: array
     items:
-      $ref: "./entity/category.yml"
+      $ref: "../entity/category.yml"
       example:
         id: 1
         board_id: 1

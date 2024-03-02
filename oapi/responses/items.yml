@@ -9,7 +9,7 @@ properties:
     description: The list of items
     type: array
     items:
-      $ref: "./entity/item.yml"
+      $ref: "../entity/item.yml"
       example:
         id: 1
         board_id: 1
