@@ -6,6 +6,9 @@ import (
 )
 
 type (
+	IBoardsRepo interface {
+		GetBoards() ([]model.Board, error)
+	}
 	BoardsRepo struct {
 		db *gorm.DB
 	}

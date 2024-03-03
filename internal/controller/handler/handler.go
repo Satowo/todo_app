@@ -8,8 +8,23 @@ import (
 	"github.com/satowo/todo-app/internal/usecase"
 )
 
-func GetBoards(w http.ResponseWriter) {
-	boards, err := usecase.GetBoards()
+type (
+	IBoardsHandler interface {
+		GetBoards(w http.ResponseWriter)
+	}
+	BoardsHandler struct {
+		boardsUsecase usecase.IBoardsUsecase
+	}
+)
+
+func NewBoardsHandler(bu usecase.IBoardsUsecase) *BoardsHandler {
+	return &BoardsHandler{
+		boardsUsecase: bu,
+	}
+}
+
+func (bh *BoardsHandler) GetBoards(w http.ResponseWriter) {
+	boards, err := bh.boardsUsecase.GetBoards()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

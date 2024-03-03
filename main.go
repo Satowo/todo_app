@@ -27,7 +27,7 @@ func main() {
 
 	// エンドポイントとhandlerの登録
 	// http.HandleFunc("/health", healthHandler)
-	// http.HandleFunc("/allUsers", allUsersNameHandler)
+	// http.HandleFunc("/allUsers", )
 	// http.HandleFunc("/channel", channelHandler)
 	// http.HandleFunc("/message", MessageHandler)
 	// http.HandleFunc("/messageEdit", MessageEditHandler)
