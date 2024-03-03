@@ -27,8 +27,7 @@ git clone https://github.com/Satowo/todo_app.git
 
 ## 3. .env ファイルの作成
 
-ルートディレクトに.env ファイルを作成する.
-（中身の値は吉田に聞く）
+ルートディレクトに.env ファイルを作成し[notion](https://www.notion.so/Peach-Tech-bf5d1684fddf427d98e139b3f0a5ecea?pvs=4)の内容をコピペする.
 
 ## 3. サーバーを起動する
 
