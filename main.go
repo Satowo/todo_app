@@ -27,16 +27,6 @@ func main() {
 	// サーバーのセットアップ
 	setup.NewServer()
 
-	// エンドポイントとhandlerの登録
-	// http.HandleFunc("/health", healthHandler)
-	// http.HandleFunc("/allUsers", )
-	// http.HandleFunc("/channel", channelHandler)
-	// http.HandleFunc("/message", MessageHandler)
-	// http.HandleFunc("/messageEdit", MessageEditHandler)
-	// http.HandleFunc("/messageDelete", MessageDeleteHandler)
-	// http.HandleFunc("/channelMember", channelMemberHandler)
-	// http.HandleFunc("/channelLeave", channelLeaveHandler)
-
 	// HTTPサーバー停止時にDBをクローズする
 	closeDBWithSysCall()
 
