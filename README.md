@@ -37,11 +37,11 @@ make start
 
 ## 4. DB （MySQL）に接続する
 
-user = root
-database = todo_app_db
-host = localhost
-port = 3306
-password = todo_pass
+user = root <br>
+database = todo_app_db <br>
+host = localhost <br>
+port = 3306 <br>
+password = todo_pass <br>
 
 でローカルの DB に接続する.
 
