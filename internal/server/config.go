@@ -1,9 +1,7 @@
 package server
 
 type Config struct {
-	// DB
 	DBConfig *DBConfig
-	// API
 	APIConfig *APIConfig
 }
 
