@@ -40,7 +40,7 @@ make start
 user = root <br>
 database = todo_app_db <br>
 host = localhost <br>
-port = 3306 <br>
+port = 3305 <br>
 password = todo_pass <br>
 
 でローカルの DB に接続する.
