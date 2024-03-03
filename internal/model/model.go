@@ -1,21 +1,21 @@
 package model
 
 type Board struct {
-	ID        int `json:"id"`
+	ID        uint64 `json:"id"`
 	Title     string `json:"title"`
 	Deleted  bool `json:"deleted"`
 }
 
 type Category struct {
-	ID        int `json:"id"`
-	BoardID   int `json:"board_id"`
+	ID        uint64 `json:"id"`
+	BoardID   uint64 `json:"board_id"`
 	Title     string `json:"title"`
 	Deleted  bool `json:"deleted"`
 }
 
 type Item struct {
-	ID        int `json:"id"`
-	CategoryID int `json:"category_id"`
+	ID        uint64 `json:"id"`
+	CategoryID uint64 `json:"category_id"`
 	Title     string `json:"title"`
 	Content   string `json:"content"`
 	ExpiredAt string `json:"expired_at"`

@@ -7,8 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/joho/godotenv"
-	repo "github.com/satowo/todo-app/internal/repository"
+	"github.com/satowo/todo-app/internal/setup"
 )
 
 func exitIfError(err error) {
@@ -19,11 +18,14 @@ func exitIfError(err error) {
 
 func main() {
 	// 環境変数の読み込み
-	err := godotenv.Load()
-	exitIfError(err)
+	dbConfig := setup.GetDBEnv()
 
 	// DBのセットアップ
-	repo.SetUpDB()
+	err := setup.SetUpDB(dbConfig)
+	exitIfError(err)
+
+	// サーバーのセットアップ
+	setup.NewServer()
 
 	// エンドポイントとhandlerの登録
 	// http.HandleFunc("/health", healthHandler)
@@ -39,7 +41,8 @@ func main() {
 	closeDBWithSysCall()
 
 	// 8080番ポートでリクエストを待ち受ける
-	log.Println("Listening...")
+	log.Println("Server is running on :8083")
+
 	err = http.ListenAndServe(":8083", nil)
 	exitIfError(err)
 }
@@ -52,7 +55,7 @@ func closeDBWithSysCall() {
 		s := <-sig
 		log.Printf("received syscall, %v", s)
 
-		err := repo.DataBaseClose()
+		err := setup.DataBaseClose()
 		if err != nil {
 			log.Fatal(err)
 		}

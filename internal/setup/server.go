@@ -1,4 +1,4 @@
-package server
+package setup
 
 import (
 	"net/http"
@@ -7,10 +7,9 @@ import (
 	"github.com/satowo/todo-app/internal/controller/router"
 	"github.com/satowo/todo-app/internal/repository"
 	"github.com/satowo/todo-app/internal/usecase"
-	"gorm.io/gorm"
 )
 
-func NewServer(db *gorm.DB) {
+func NewServer() {
 	repo := repository.NewBoardsRepo(db)
 
 	boardsUsecase := usecase.NewBoardsUsecase(repo)
@@ -19,5 +18,5 @@ func NewServer(db *gorm.DB) {
 
 	boardsRouter := router.NewBoardsRouter(boardsHandler)
 
-	http.HandleFunc("/allUsers", boardsRouter.BoardsRouter)
+	http.HandleFunc("/boards", boardsRouter.BoardsRouter)
 }
