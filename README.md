@@ -22,7 +22,7 @@ git clone https://github.com/Satowo/todo_app.git
 ## 2. パッケージのインストール
 
 ```bash
-- go install github.com/cosmtrek/air@latest
+go install github.com/cosmtrek/air@latest
 ```
 
 ## 3. .env ファイルの作成
