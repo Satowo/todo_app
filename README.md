@@ -28,18 +28,22 @@ git clone https://github.com/Satowo/todo_app.git
 ## 3. .env ファイルの作成
 
 ルートディレクトに.env ファイルを作成する.
-（中身の値は吉田に聞いてください）
+（中身の値は吉田に聞く）
 
-## 3. DB の初期値を投入する
-
-DB の GUI ツールの SQL エディタに
-/database/schema.sql をコピペして、ローカルの DB を作成する.
-
-## 4. サーバーを起動する
+## 3. サーバーを起動する
 
 ```bash
 make start
 ```
+
+## 4. DB に接続する
+
+環境変数を参考にして MySQL に接続する
+
+## 4. DB の初期値を投入する
+
+DB の GUI ツールの SQL エディタに
+/database/schema.sql をコピペして、ローカルの DB を作成する.
 
 ## 5. API 定義書を確認
 
