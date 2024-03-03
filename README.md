@@ -49,7 +49,7 @@ password = todo_pass
 ## 4. DB の初期値を投入する
 
 DB の GUI ツールの SQL エディタに
-/database/schema.sql をコピペして、ローカルの DB を作成する.
+/database/schema.sql をコピペして、初期値を投入する.
 
 ## 5. API 定義書を確認
 
