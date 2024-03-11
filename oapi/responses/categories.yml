@@ -14,7 +14,7 @@ properties:
         id: 1
         board_id: 1
         title: "category title"
-        content: "category content"
         deleted: false
 required:
   - categories_list
+# TODO: カラムなしの配列に変更

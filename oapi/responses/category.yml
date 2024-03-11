@@ -9,5 +9,4 @@ example:
   id: 1
   board_id: 1
   title: "category title"
-  content: "category content"
   deleted: false

@@ -12,3 +12,4 @@ properties:
       $ref: "../entity/board.yml"
 required:
   - boards_list
+# TODO: カラムなしの配列に変更

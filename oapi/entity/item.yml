@@ -9,10 +9,6 @@ properties:
     description: board id
     type: integer
     format: int64
-  board_id:
-    description: board id that category belongs to
-    type: integer
-    format: int64
   category_id:
     description: category id that item belongs to
     type: integer
@@ -33,7 +29,6 @@ properties:
     default: false
 required:
   - id
-  - board_id
   - category_id
   - title
   - content
