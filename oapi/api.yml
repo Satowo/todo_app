@@ -17,25 +17,6 @@ tags:
   - name: items
     description: アイテム関連エンドポイント
 paths:
-  /health:
-    get:
-      summary: 疎通確認用エンドポイント
-      description: |-
-        ## 概要
-        - APIサーバーの疎通確認を行う
-      tags:
-        - healthcheck
-      operationId: healthCheck
-      security: []
-      responses:
-        "200":
-          description: Successfully connected
-          content:
-            text/plain:
-              schema:
-                $ref: "./responses/health.yml"
-        default:
-          $ref: "./errors/unexpected.yml"
   /boards:
     get:
       summary: ボード一覧を取得するエンドポイント
