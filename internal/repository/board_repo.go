@@ -10,6 +10,7 @@ type (
 		GetBoards() ([]model.Board, error)
 		CreateBoard(board *model.Board) error
 		UpdateBoard(board *model.Board) error
+		DeleteBoard(board *model.Board) error
 	}
 	BoardsRepo struct {
 		db *gorm.DB
@@ -33,5 +34,10 @@ func (br *BoardsRepo) CreateBoard(board *model.Board) error {
 
 func (br *BoardsRepo) UpdateBoard(board *model.Board) error {
 	err := br.db.Save(&board).Error
+	return err
+}
+
+func (br *BoardsRepo) DeleteBoard(board *model.Board) error {
+	err := br.db.Delete(&board).Error
 	return err
 }

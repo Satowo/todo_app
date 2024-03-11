@@ -24,6 +24,7 @@ func SetUpRouter(db *gorm.DB) *mux.Router {
 	r.HandleFunc("/boards", boardsHandler.GetBoards).Methods("GET")
 	r.HandleFunc("/boards", boardsHandler.CreateBoard).Methods("POST")
 	r.HandleFunc("/boards/{boardID}", boardsHandler.UpdateBoard).Methods("POST")
+	r.HandleFunc("/boards/{boardID}", boardsHandler.DeleteBoard).Methods("DELETE")
 
 	return r
 }
