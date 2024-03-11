@@ -11,13 +11,16 @@ import (
 
 func SetUpRouter(db *gorm.DB) *mux.Router {
 	// repository
-	repo := repository.NewBoardsRepo(db)
+	boards_repo := repository.NewBoardsRepo(db)
+	categories_repo := repository.NewCategoriesRepo(db)
 
 	// usecase
-	boardsUsecase := usecase.NewBoardsUsecase(repo)
+	boardsUsecase := usecase.NewBoardsUsecase(boards_repo)
+	categoriesUsecase := usecase.NewCategoriesUsecase(categories_repo)
 
 	// handler
 	boardsHandler := handler.NewBoardsHandler(boardsUsecase)
+	categoriesHandler := handler.NewCategoriesHandler(categoriesUsecase)
 
 	// エンドポイントの設定
 	r := mux.NewRouter()
@@ -25,6 +28,11 @@ func SetUpRouter(db *gorm.DB) *mux.Router {
 	r.HandleFunc("/boards", boardsHandler.CreateBoard).Methods("POST")
 	r.HandleFunc("/boards/{boardID}", boardsHandler.UpdateBoard).Methods("POST")
 	r.HandleFunc("/boards/{boardID}", boardsHandler.DeleteBoard).Methods("DELETE")
+
+	r.HandleFunc("/categories", categoriesHandler.GetCategories).Methods("GET")
+	r.HandleFunc("/categories", categoriesHandler.CreateCategory).Methods("POST")
+	r.HandleFunc("/categories/{categoryID}", categoriesHandler.UpdateCategory).Methods("POST")
+	r.HandleFunc("/categories/{categoryID}", categoriesHandler.DeleteCategory).Methods("DELETE")
 
 	return r
 }
