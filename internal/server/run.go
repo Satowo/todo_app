@@ -3,16 +3,19 @@ package server
 import (
 	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type Server struct {
 	Address string
+	router *mux.Router
 }
 
 // APIサーバーの起動
-func  (server *Server) Run(){
-	log.Printf("Server is running on %s", server.Address)
-	err := http.ListenAndServe(server.Address, nil)
+func  (s *Server) Run(){
+	log.Printf("Server is running on %s", s.Address)
+	err := http.ListenAndServe(s.Address, s.router)
 	if err != nil {
 		log.Fatalln(err)
 	}
