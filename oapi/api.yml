@@ -8,8 +8,6 @@ servers:
   - url: http://localhost:8083
     description: ローカル開発環境
 tags:
-  - name: healthcheck
-    description: 疎通確認エンドポイント
   - name: boards
     description: ボード関連エンドポイント
   - name: categories
