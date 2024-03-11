@@ -29,10 +29,20 @@ func NewCategoriesHandler(bu usecase.ICategoriesUsecase) *CategoriesHandler {
 	}
 }
 
-func (bh *CategoriesHandler) GetCategories(w http.ResponseWriter, _ *http.Request) {
+func (bh *CategoriesHandler) GetCategories(w http.ResponseWriter, r *http.Request) {
 	HeaderSet(w)
 
-	Categories, err := bh.CategoriesUsecase.GetCategories()
+	// クエリパラメータのboardIDを取得
+	boardID := 	r.URL.Query().Get("board_id")
+	convertedboardID, err := strconv.ParseUint(boardID, 10, 64)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	log.Printf("boardID: %v\n", convertedboardID)
+
+	Categories, err := bh.CategoriesUsecase.GetCategories(convertedboardID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -70,7 +80,7 @@ func (bh *CategoriesHandler) CreateCategory(w http.ResponseWriter, r *http.Reque
 func (bh *CategoriesHandler) UpdateCategory(w http.ResponseWriter, r *http.Request) {
 	HeaderSet(w)
 	
-	categoryID := 	mux.Vars(r)["CategoryID"]
+	categoryID := mux.Vars(r)["CategoryID"]
 
 	// stringをuint64に変換
 	convertedCategoryID, err := strconv.ParseUint(categoryID, 10, 64)
