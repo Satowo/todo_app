@@ -80,7 +80,7 @@ func (bh *CategoriesHandler) CreateCategory(w http.ResponseWriter, r *http.Reque
 func (bh *CategoriesHandler) UpdateCategory(w http.ResponseWriter, r *http.Request) {
 	HeaderSet(w)
 	
-	categoryID := mux.Vars(r)["CategoryID"]
+	categoryID := mux.Vars(r)["categoryID"]
 
 	// stringをuint64に変換
 	convertedCategoryID, err := strconv.ParseUint(categoryID, 10, 64)
@@ -114,7 +114,7 @@ func (bh *CategoriesHandler) UpdateCategory(w http.ResponseWriter, r *http.Reque
 func (bh *CategoriesHandler) DeleteCategory(w http.ResponseWriter, r *http.Request) {
 	HeaderSet(w)
 
-	categoryID := 	mux.Vars(r)["CategoryID"]
+	categoryID := 	mux.Vars(r)["categoryID"]
 
 	// stringをuint64に変換
 	convertedCategoryID, err := strconv.ParseUint(categoryID, 10, 64)
