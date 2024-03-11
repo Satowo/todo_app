@@ -8,6 +8,7 @@ import (
 type (
 	IBoardsRepo interface {
 		GetBoards() ([]model.Board, error)
+		CreateBoard(board *model.Board) error
 	}
 	BoardsRepo struct {
 		db *gorm.DB
@@ -22,4 +23,9 @@ func (br *BoardsRepo) GetBoards() ([]model.Board, error) {
 	var boards []model.Board
 	err := br.db.Find(&boards).Error
 	return boards, err
+}
+
+func (br *BoardsRepo) CreateBoard(board *model.Board) error {
+	err := br.db.Create(&board).Error
+	return err
 }

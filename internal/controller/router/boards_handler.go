@@ -32,7 +32,7 @@ func (br *BoardsRouter) BoardsRouter(w http.ResponseWriter, r *http.Request) {
 		br.boardsHandler.GetBoards(w)
 
 	case http.MethodPost:
-		// br.boardsHandler.UserRegisterController(w, r)
+		br.boardsHandler.CreateBoard(w, r)
 
 	default:
 		log.Printf("fail: HTTP Method is %s\n", r.Method)

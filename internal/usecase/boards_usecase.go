@@ -8,6 +8,7 @@ import (
 type (
 	IBoardsUsecase interface {
 		GetBoards() ([]model.Board, error)
+		CreateBoard(board *model.Board) error
 	}
 	BoardsUsecase struct {
 		repo repository.IBoardsRepo
@@ -24,4 +25,10 @@ func (bu *BoardsUsecase) GetBoards() ([]model.Board, error) {
 	boards, err := bu.repo.GetBoards()
 
 	return 	boards, err
+}
+
+func (bu *BoardsUsecase) CreateBoard(board *model.Board) error {
+	err := bu.repo.CreateBoard(board)
+
+	return err
 }
