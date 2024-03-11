@@ -447,6 +447,33 @@ paths:
           description: Successfully archive an item
         default:
           $ref: "./errors/unexpected.yml"
+  /items/archived:
+    get:
+      summary: カテゴリ内のアーカイブ済みアイテム一覧を取得するエンドポイント
+      description: |-
+        ## 概要
+        - 特定のカテゴリ内のアーカイブ済みアイテム一覧を取得する
+      tags:
+        - items
+      operationId: getArchivedItems
+      security: []
+      paramter:
+        - name: board_id
+          in: query
+          description: アーカイブ済みアイテム一覧を取得するボードのID
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "200":
+          description: 特定のボード内のアーカイブ済みアイテムを全て返す
+          content:
+            application/json:
+              schema:
+                $ref: "./responses/items.yml"
+        default:
+          $ref: "./errors/unexpected.yml"
   /items/archived/{item_id}:
     post:
       summary: アイテムをアーカイブ解除するエンドポイント
