@@ -16,6 +16,7 @@ type (
 		GetBoards(w http.ResponseWriter, _ *http.Request)
 		CreateBoard(w http.ResponseWriter, r *http.Request)
 		UpdateBoard(w http.ResponseWriter, r *http.Request)
+		DeleteBoard(w http.ResponseWriter, r *http.Request)
 	}
 	BoardsHandler struct {
 		boardsUsecase usecase.IBoardsUsecase
@@ -93,6 +94,30 @@ func (bh *BoardsHandler) UpdateBoard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := bh.boardsUsecase.UpdateBoard(&board); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (bh *BoardsHandler) DeleteBoard(w http.ResponseWriter, r *http.Request) {
+	HeaderSet(w)
+
+	boardID := 	mux.Vars(r)["boardID"]
+
+	// stringをuint64に変換
+	convertedboardID, err := strconv.ParseUint(boardID, 10, 64)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	board := model.Board{
+		ID: convertedboardID,
+	}
+
+	if err := bh.boardsUsecase.DeleteBoard(&board); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
