@@ -11,16 +11,20 @@ import (
 
 func SetUpRouter(db *gorm.DB) *mux.Router {
 	// repository
-	boards_repo := repository.NewBoardsRepo(db)
-	categories_repo := repository.NewCategoriesRepo(db)
+	boardsRepo := repository.NewBoardsRepo(db)
+	categoriesRepo := repository.NewCategoriesRepo(db)
+	itemsRepo := repository.NewItemsRepo(db)
 
 	// usecase
-	boardsUsecase := usecase.NewBoardsUsecase(boards_repo)
-	categoriesUsecase := usecase.NewCategoriesUsecase(categories_repo)
+	boardsUsecase := usecase.NewBoardsUsecase(boardsRepo)
+	categoriesUsecase := usecase.NewCategoriesUsecase(categoriesRepo)
+	itemsUsecase := usecase.NewItemsUsecase(itemsRepo)
 
 	// handler
 	boardsHandler := handler.NewBoardsHandler(boardsUsecase)
 	categoriesHandler := handler.NewCategoriesHandler(categoriesUsecase)
+	itemsHandler := handler.NewItemsHandler(itemsUsecase)
+	archivedItemsHandler := handler.NewArchivedItemsHandler(itemsUsecase)
 
 	// エンドポイントの設定
 	r := mux.NewRouter()
@@ -33,6 +37,14 @@ func SetUpRouter(db *gorm.DB) *mux.Router {
 	r.HandleFunc("/categories", categoriesHandler.CreateCategory).Methods("POST")
 	r.HandleFunc("/categories/{categoryID}", categoriesHandler.UpdateCategory).Methods("POST")
 	r.HandleFunc("/categories/{categoryID}", categoriesHandler.DeleteCategory).Methods("DELETE")
+
+	r.HandleFunc("/items", itemsHandler.GetItems).Methods("GET")
+	r.HandleFunc("/items", itemsHandler.CreateItem).Methods("POST")
+	r.HandleFunc("/items/{itemID}", itemsHandler.UpdateItem).Methods("PUT")
+	r.HandleFunc("/items/{itemID}", itemsHandler.ArchiveItem).Methods("POST")
+
+	r.HandleFunc("/items/archived", archivedItemsHandler.GetArchivedItems).Methods("GET")
+	r.HandleFunc("/items/archived/{itemID}", archivedItemsHandler.UnArchiveItem).Methods("POST")
 
 	return r
 }
