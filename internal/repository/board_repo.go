@@ -9,6 +9,7 @@ type (
 	IBoardsRepo interface {
 		GetBoards() ([]model.Board, error)
 		CreateBoard(board *model.Board) error
+		UpdateBoard(board *model.Board) error
 	}
 	BoardsRepo struct {
 		db *gorm.DB
@@ -27,5 +28,10 @@ func (br *BoardsRepo) GetBoards() ([]model.Board, error) {
 
 func (br *BoardsRepo) CreateBoard(board *model.Board) error {
 	err := br.db.Create(&board).Error
+	return err
+}
+
+func (br *BoardsRepo) UpdateBoard(board *model.Board) error {
+	err := br.db.Save(&board).Error
 	return err
 }

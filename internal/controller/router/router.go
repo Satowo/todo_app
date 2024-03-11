@@ -1,16 +1,15 @@
-package server
+package router
 
 import (
-	"net/http"
-
+	"github.com/gorilla/mux"
 	"github.com/satowo/todo-app/internal/controller/handler"
-	"github.com/satowo/todo-app/internal/controller/router"
 	"github.com/satowo/todo-app/internal/repository"
 	"github.com/satowo/todo-app/internal/usecase"
 	"gorm.io/gorm"
 )
 
-func setUpRouter(db *gorm.DB) {
+
+func SetUpRouter(db *gorm.DB) *mux.Router {
 	// repository
 	repo := repository.NewBoardsRepo(db)
 
@@ -20,10 +19,12 @@ func setUpRouter(db *gorm.DB) {
 	// handler
 	boardsHandler := handler.NewBoardsHandler(boardsUsecase)
 
-	// router
-	boardsRouter := router.NewBoardsRouter(boardsHandler)
-
 	// エンドポイントの設定
-	http.HandleFunc("/boards", boardsRouter.BoardsRouter)
+	r := mux.NewRouter()
+	r.HandleFunc("/boards", boardsHandler.GetBoards).Methods("GET")
+	r.HandleFunc("/boards", boardsHandler.CreateBoard).Methods("POST")
+	r.HandleFunc("/boards/{boardID}", boardsHandler.UpdateBoard).Methods("POST")
+
+	return r
 }
 

@@ -3,6 +3,8 @@ package server
 import (
 	"fmt"
 	"log"
+
+	"github.com/satowo/todo-app/internal/controller/router"
 )
 
 func NewServer(config *Config) *Server {
@@ -11,9 +13,10 @@ func NewServer(config *Config) *Server {
 		log.Fatal(err)
 	}
 
-	setUpRouter(db)
+	router := router.SetUpRouter(db)
 
 	return &Server{
 		Address: fmt.Sprintf(":%s", config.APIConfig.Port),
+		router:  router,
 	}
 }
