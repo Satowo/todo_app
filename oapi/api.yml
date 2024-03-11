@@ -428,10 +428,10 @@ paths:
           $ref: "./errors/unexpected.yml"
   /items/archived:
     get:
-      summary: カテゴリ内のアーカイブ済みアイテム一覧を取得するエンドポイント
+      summary: ボード内のアーカイブ済みアイテム一覧を取得するエンドポイント
       description: |-
         ## 概要
-        - 特定のカテゴリ内のアーカイブ済みアイテム一覧を取得する
+        - 特定のボード内のアーカイブ済みアイテム一覧を取得する
       tags:
         - items
       operationId: getArchivedItems
