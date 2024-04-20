@@ -33,7 +33,7 @@ func (ih *ItemsHandler) GetItems(w http.ResponseWriter, r *http.Request) {
 	HeaderSet(w)
 
 	// クエリパラメータのboardIDを取得
-	categoryID := 	r.URL.Query().Get("category_id")
+	categoryID := r.URL.Query().Get("category_id")
 	convertedCategoryID, err := strconv.ParseUint(categoryID, 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

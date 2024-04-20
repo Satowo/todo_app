@@ -142,7 +142,7 @@ paths:
       parameters:
         - name: board_id
           in: query
-          description: カテゴリ一覧を取得するボードのID
+          description: カテゴリ一覧を取得するボードのIDをクエリパラメータで指定
           required: true
           schema:
             type: integer
@@ -274,10 +274,10 @@ paths:
         - items
       operationId: getItems
       security: []
-      paramter:
+      parameters:
         - name: category_id
           in: query
-          description: アイテム一覧を取得するカテゴリのID
+          description: アイテム一覧を取得するカテゴリのIDをクエリパラメータで指定
           required: true
           schema:
             type: integer
