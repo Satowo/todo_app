@@ -8,9 +8,11 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// 環境変数を取得し、Configにセット
-func NewConfig() *Config {
-	config := &Config{
+var config *Config
+
+// 環境変数を取得し、configにセット
+func NewConfig() {
+	config = &Config{
 		DBConfig: &DBConfig{
 			DBName: getEnv("MYSQL_DB"),
 			DBUser: getEnv("MYSQL_USER"),
@@ -19,11 +21,12 @@ func NewConfig() *Config {
 			DBPort: getEnv("MYSQL_PORT"),
 		},
 		APIConfig: &APIConfig{
-			Port: getEnv("API_PORT"),
+			APIPort: getEnv("API_PORT"),
+		},
+		WebConfig : &WebConfig{
+			WebURL: getEnv("WEB_URL"),
 		},
 	}
-
-	return config
 }
 
 // DBの環境変数を取得

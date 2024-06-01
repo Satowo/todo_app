@@ -5,9 +5,9 @@ import (
 )
 
 func main() {
-	config := server.NewConfig()
+	server.NewConfig()
 
-	httpServer := server.NewServer(config)
+	httpServer := server.NewServer()
 
 	httpServer.Run()
 }

@@ -30,8 +30,6 @@ func NewCategoriesHandler(bu usecase.ICategoriesUsecase) *CategoriesHandler {
 }
 
 func (bh *CategoriesHandler) GetCategories(w http.ResponseWriter, r *http.Request) {
-	HeaderSet(w)
-
 	// クエリパラメータのboardIDを取得
 	boardID := 	r.URL.Query().Get("board_id")
 	convertedboardID, err := strconv.ParseUint(boardID, 10, 64)
@@ -39,8 +37,6 @@ func (bh *CategoriesHandler) GetCategories(w http.ResponseWriter, r *http.Reques
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
-	log.Printf("boardID: %v\n", convertedboardID)
 
 	Categories, err := bh.CategoriesUsecase.GetCategories(convertedboardID)
 	if err != nil {
@@ -60,8 +56,6 @@ func (bh *CategoriesHandler) GetCategories(w http.ResponseWriter, r *http.Reques
 }
 
 func (bh *CategoriesHandler) CreateCategory(w http.ResponseWriter, r *http.Request) {
-	HeaderSet(w)
-
 	var category model.Category
 	if err := json.NewDecoder(r.Body).Decode(&category); err != nil {
 		log.Printf("fail: json.NewDecoder, %v\n", err)
@@ -77,9 +71,7 @@ func (bh *CategoriesHandler) CreateCategory(w http.ResponseWriter, r *http.Reque
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (bh *CategoriesHandler) UpdateCategory(w http.ResponseWriter, r *http.Request) {
-	HeaderSet(w)
-	
+func (bh *CategoriesHandler) UpdateCategory(w http.ResponseWriter, r *http.Request) {	
 	categoryID := mux.Vars(r)["categoryID"]
 
 	// stringをuint64に変換
@@ -112,8 +104,6 @@ func (bh *CategoriesHandler) UpdateCategory(w http.ResponseWriter, r *http.Reque
 }
 
 func (bh *CategoriesHandler) DeleteCategory(w http.ResponseWriter, r *http.Request) {
-	HeaderSet(w)
-
 	categoryID := 	mux.Vars(r)["categoryID"]
 
 	// stringをuint64に変換

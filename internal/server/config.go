@@ -3,6 +3,7 @@ package server
 type Config struct {
 	DBConfig *DBConfig
 	APIConfig *APIConfig
+	WebConfig *WebConfig
 }
 
 type DBConfig struct {
@@ -14,5 +15,9 @@ type DBConfig struct {
 }
 
 type APIConfig struct {
-	Port string
+	APIPort string
+}
+
+type WebConfig struct {
+	WebURL string
 }

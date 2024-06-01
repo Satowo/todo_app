@@ -30,8 +30,6 @@ func NewItemsHandler(iu usecase.IItemsUsecase) *ItemsHandler {
 }
 
 func (ih *ItemsHandler) GetItems(w http.ResponseWriter, r *http.Request) {
-	HeaderSet(w)
-
 	// クエリパラメータのboardIDを取得
 	categoryID := r.URL.Query().Get("category_id")
 	convertedCategoryID, err := strconv.ParseUint(categoryID, 10, 64)
@@ -58,8 +56,6 @@ func (ih *ItemsHandler) GetItems(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ih *ItemsHandler) CreateItem(w http.ResponseWriter, r *http.Request) {
-	HeaderSet(w)
-
 	var item model.Item
 	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
 		log.Printf("fail: json.NewDecoder, %v\n", err)
@@ -75,9 +71,7 @@ func (ih *ItemsHandler) CreateItem(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (ih *ItemsHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
-	HeaderSet(w)
-	
+func (ih *ItemsHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {	
 	itemID := mux.Vars(r)["itemID"]
 
 	// stringをuint64に変換
@@ -110,8 +104,6 @@ func (ih *ItemsHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ih *ItemsHandler) ArchiveItem(w http.ResponseWriter, r *http.Request) {
-	HeaderSet(w)
-
 	itemID := mux.Vars(r)["itemID"]
 
 	// stringをuint64に変換

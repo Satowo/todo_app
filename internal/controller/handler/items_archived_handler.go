@@ -27,8 +27,6 @@ func NewArchivedItemsHandler(au usecase.IItemsUsecase) *ArchivedItemsHandler {
 }
 
 func (ah *ArchivedItemsHandler) GetArchivedItems(w http.ResponseWriter, r *http.Request) {
-	HeaderSet(w)
-
 	// クエリパラメータのboardIDを取得
 	boardID := 	r.URL.Query().Get("board_id")
 	convertedBoardID, err := strconv.ParseUint(boardID, 10, 64)
@@ -55,8 +53,6 @@ func (ah *ArchivedItemsHandler) GetArchivedItems(w http.ResponseWriter, r *http.
 }
 
 func (ih *ArchivedItemsHandler) UnArchiveItem(w http.ResponseWriter, r *http.Request) {
-	HeaderSet(w)
-
 	ArchiveditemID := mux.Vars(r)["itemID"]
 
 	// stringをuint64に変換

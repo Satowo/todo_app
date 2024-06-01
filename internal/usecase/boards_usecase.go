@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"github.com/satowo/todo-app/internal/controller/types"
 	"github.com/satowo/todo-app/internal/model"
 	"github.com/satowo/todo-app/internal/repository"
 )
@@ -8,7 +9,7 @@ import (
 type (
 	IBoardsUsecase interface {
 		GetBoards() ([]model.Board, error)
-		CreateBoard(board *model.Board) error
+		CreateBoard(param *types.CreateBoardRequest) error
 		UpdateBoard(board *model.Board) error
 		DeleteBoard(board *model.Board) error
 	}
@@ -29,7 +30,12 @@ func (bu *BoardsUsecase) GetBoards() ([]model.Board, error) {
 	return 	boards, err
 }
 
-func (bu *BoardsUsecase) CreateBoard(board *model.Board) error {
+func (bu *BoardsUsecase) CreateBoard(param *types.CreateBoardRequest) error {
+	board := &model.Board{
+		Title: param.BoardTitle,
+		Deleted: false,
+	}
+
 	err := bu.repo.CreateBoard(board)
 
 	return err
