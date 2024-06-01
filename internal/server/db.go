@@ -14,13 +14,13 @@ import (
 )
 
 //GORMを使ってDBを開く
-func SetUpDB(dbConfig *DBConfig) (*gorm.DB, error) {
+func SetUpDB() (*gorm.DB, error) {
 	m := mysql.New(mysql.Config{
 		DSNConfig: &dmysql.Config{
-			User:      dbConfig.DBUser,
-			Passwd:    dbConfig.DBPass,
-			DBName:    dbConfig.DBName,
-			Addr:      fmt.Sprintf("%s:%s", dbConfig.DBHost, dbConfig.DBPort),
+			User:      config.DBConfig.DBUser,
+			Passwd:    config.DBConfig.DBPass,
+			DBName:    config.DBConfig.DBName,
+			Addr:      fmt.Sprintf("%s:%s", config.DBConfig.DBHost, config.DBConfig.DBPort),
 			Net:       "tcp",
 			Loc:       time.Local,
 			ParseTime: true,

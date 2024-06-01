@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/satowo/todo-app/internal/controller/types"
 	"github.com/satowo/todo-app/internal/model"
 	"github.com/satowo/todo-app/internal/usecase"
 )
@@ -30,8 +31,6 @@ func NewBoardsHandler(bu usecase.IBoardsUsecase) *BoardsHandler {
 }
 
 func (bh *BoardsHandler) GetBoards(w http.ResponseWriter, _ *http.Request) {
-	HeaderSet(w)
-
 	boards, err := bh.boardsUsecase.GetBoards()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -50,16 +49,14 @@ func (bh *BoardsHandler) GetBoards(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (bh *BoardsHandler) CreateBoard(w http.ResponseWriter, r *http.Request) {
-	HeaderSet(w)
-
-	var board model.Board
-	if err := json.NewDecoder(r.Body).Decode(&board); err != nil {
+	var param types.CreateBoardRequest
+	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
 		log.Printf("fail: json.NewDecoder, %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	if err := bh.boardsUsecase.CreateBoard(&board); err != nil {
+	if err := bh.boardsUsecase.CreateBoard(&param); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -68,8 +65,6 @@ func (bh *BoardsHandler) CreateBoard(w http.ResponseWriter, r *http.Request) {
 }
 
 func (bh *BoardsHandler) UpdateBoard(w http.ResponseWriter, r *http.Request) {
-	HeaderSet(w)
-	
 	boardID := 	mux.Vars(r)["boardID"]
 
 	// stringをuint64に変換
@@ -102,8 +97,6 @@ func (bh *BoardsHandler) UpdateBoard(w http.ResponseWriter, r *http.Request) {
 }
 
 func (bh *BoardsHandler) DeleteBoard(w http.ResponseWriter, r *http.Request) {
-	HeaderSet(w)
-
 	boardID := 	mux.Vars(r)["boardID"]
 
 	// stringをuint64に変換
