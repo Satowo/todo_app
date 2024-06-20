@@ -9,14 +9,14 @@ type Board struct {
 type Category struct {
 	ID        uint64 `json:"id"`
 	BoardID   uint64 `json:"board_id"`
-	Title     string `json:"title"`
+	Title     string `json:"category_title"`
 	Deleted  bool `json:"deleted"`
 }
 
 type Item struct {
 	ID        uint64 `json:"id"`
 	CategoryID uint64 `json:"category_id"`
-	Title     string `json:"title"`
+	Title     string `json:"item_title"`
 	Content   string `json:"content"`
 	ExpiredAt string `json:"expired_at"`
 	Archived  bool `json:"archived"`
