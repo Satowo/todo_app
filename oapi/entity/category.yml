@@ -20,7 +20,13 @@ properties:
     description: category is deleted or not
     type: boolean
     default: false
+example:
+  id: 1
+  board_id: 1
+  title: "category title"
+  deleted: false
 required:
   - id
+  - board_id
   - title
-  - archived
+  - deleted

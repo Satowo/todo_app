@@ -5,8 +5,3 @@ description: |-
 
 schema:
   $ref: "../entity/category.yml"
-example:
-  id: 1
-  board_id: 1
-  title: "category title"
-  deleted: false

@@ -3,20 +3,8 @@ description: |-
   ## 概要
   - アイテム一覧取得のレスポンス定義
 
-type: object
-properties:
-  items_list:
-    description: The list of items
-    type: array
-    items:
-      $ref: "../entity/item.yml"
-      example:
-        id: 1
-        category_id: 1
-        title: "item title"
-        content: "item content"
-        expired_at: "2021-01-01 00:00:00"
-        archived: false
+type: array
+items:
+  $ref: "../entity/item.yml"
 required:
-  - items_list
-# TODO: カラムなしの配列に変更
+  - items
