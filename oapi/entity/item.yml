@@ -6,7 +6,7 @@ description: |-
 type: object
 properties:
   id:
-    description: board id
+    description: item id
     type: integer
     format: int64
   category_id:
@@ -27,6 +27,13 @@ properties:
     description: board is deleted or not
     type: boolean
     default: false
+example:
+  id: 1
+  category_id: 1
+  title: "item title"
+  content: "item content"
+  expired_at: "2021-01-01 00:00:00"
+  archived: false
 required:
   - id
   - category_id

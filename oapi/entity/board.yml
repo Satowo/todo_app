@@ -13,10 +13,14 @@ properties:
     description: board title
     type: string
   deleted:
-    description: board is archived or not
+    description: board is deleted or not
     type: boolean
     default: false
+example:
+  id: 1
+  title: "board title"
+  deleted: false
 required:
   - id
   - title
-  - archived
+  - deleted

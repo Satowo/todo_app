@@ -30,7 +30,7 @@ func NewItemsHandler(iu usecase.IItemsUsecase) *ItemsHandler {
 }
 
 func (ih *ItemsHandler) GetItems(w http.ResponseWriter, r *http.Request) {
-	// クエリパラメータのboardIDを取得
+	// クエリパラメータのcategoryIDを取得
 	categoryID := r.URL.Query().Get("category_id")
 	convertedCategoryID, err := strconv.ParseUint(categoryID, 10, 64)
 	if err != nil {
