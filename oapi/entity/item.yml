@@ -13,8 +13,8 @@ properties:
     description: category id that item belongs to
     type: integer
     format: int64
-  title:
-    description: board title
+  item_title:
+    description: item title
     type: string
   content:
     description: item content
@@ -23,8 +23,8 @@ properties:
     description: item expired date
     type: string
     format: date-time
-  archived:
-    description: board is deleted or not
+  deleted:
+    description: item is deleted or not
     type: boolean
     default: false
 example:
@@ -33,10 +33,10 @@ example:
   item_title: "item title"
   content: "item content"
   expired_at: "2021-01-01 00:00:00"
-  archived: false
+  deleted: false
 required:
   - id
   - category_id
   - item_title
   - content
-  - archived
+  - deleted

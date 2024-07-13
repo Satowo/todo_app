@@ -19,5 +19,5 @@ type Item struct {
 	Title     string `json:"title"`
 	Content   string `json:"content"`
 	ExpiredAt string `json:"expired_at"`
-	Archived  bool `json:"archived"`
+	Deleted  bool `json:"deleted"`
 }

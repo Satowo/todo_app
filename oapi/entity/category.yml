@@ -13,7 +13,7 @@ properties:
     description: board id that category belongs to
     type: integer
     format: int64
-  title:
+  category_title:
     description: category title
     type: string
   deleted:

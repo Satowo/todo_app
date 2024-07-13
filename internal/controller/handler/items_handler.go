@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/satowo/todo-app/internal/model"
+	"github.com/satowo/todo-app/internal/controller/types"
 	"github.com/satowo/todo-app/internal/usecase"
 )
 
@@ -16,7 +16,7 @@ type (
 		GetItems(w http.ResponseWriter, r *http.Request)
 		CreateItem(w http.ResponseWriter, r *http.Request)
 		UpdateItem(w http.ResponseWriter, r *http.Request)
-		ArchiveItem(w http.ResponseWriter, r *http.Request)
+		DeleteItem(w http.ResponseWriter, r *http.Request)
 	}
 	ItemsHandler struct {
 		ItemsUsecase usecase.IItemsUsecase
@@ -56,14 +56,14 @@ func (ih *ItemsHandler) GetItems(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ih *ItemsHandler) CreateItem(w http.ResponseWriter, r *http.Request) {
-	var item model.Item
-	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
+	var req types.CreateItemRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Printf("fail: json.NewDecoder, %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	if err := ih.ItemsUsecase.CreateItem(&item); err != nil {
+	if err := ih.ItemsUsecase.CreateItem(req.CategoryID, req.ItemTitle, req.Content, req.ExpiredAt); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -82,20 +82,14 @@ func (ih *ItemsHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// リクエストボディをデコード
-	var item model.Item
-	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
+	var req types.UpdateItemRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Printf("fail: json.NewDecoder, %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	// リクエストボディのItemIDとパスパラメータのItemIDが一致しない場合は400を返す
-	if item.ID != convertedItemID{
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	if err := ih.ItemsUsecase.UpdateItem(&item); err != nil {
+	if err := ih.ItemsUsecase.UpdateItem(convertedItemID, req.CategoryID, req.ItemTitle, req.Content, req.ExpiredAt); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -103,7 +97,7 @@ func (ih *ItemsHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (ih *ItemsHandler) ArchiveItem(w http.ResponseWriter, r *http.Request) {
+func (ih *ItemsHandler) DeleteItem(w http.ResponseWriter, r *http.Request) {
 	itemID := mux.Vars(r)["itemID"]
 
 	// stringをuint64に変換
@@ -113,7 +107,7 @@ func (ih *ItemsHandler) ArchiveItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := ih.ItemsUsecase.ArchiveItem(convertedItemID); err != nil {
+	if err := ih.ItemsUsecase.DeleteItem(convertedItemID); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

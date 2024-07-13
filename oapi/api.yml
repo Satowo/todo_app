@@ -60,10 +60,6 @@ paths:
       responses:
         "201":
           description: Successfully create a new board
-          content:
-            application/json:
-              schema:
-                $ref: "./responses/board.yml"
         default:
           $ref: "./errors/unexpected.yml"
   /boards/{board_id}:
@@ -101,10 +97,6 @@ paths:
       responses:
         "200":
           description: Successfully update a board
-          content:
-            application/json:
-              schema:
-                $ref: "./responses/board.yml"
         default:
           $ref: "./errors/unexpected.yml"
     delete:
@@ -187,10 +179,6 @@ paths:
       responses:
         "201":
           description: Successfully create a new category
-          content:
-            application/json:
-              schema:
-                $ref: "./entity/category.yml"
         default:
           $ref: "./errors/unexpected.yml"
   /categories/{category_id}:
@@ -228,10 +216,6 @@ paths:
       responses:
         "200":
           description: Successfully update a category
-          content:
-            application/json:
-              schema:
-                $ref: "./entity/category.yml"
         default:
           $ref: "./errors/unexpected.yml"
     delete:
@@ -292,14 +276,6 @@ paths:
         - items
       operationId: createItem
       security: []
-      parameters:
-        - name: category_id
-          in: query
-          description: 新規作成するアイテムのカテゴリID
-          required: true
-          schema:
-            type: integer
-            example: 1
       requestBody:
         description: 新規作成するアイテム
         required: true
@@ -334,14 +310,10 @@ paths:
       responses:
         "201":
           description: Successfully create a new item
-          content:
-            application/json:
-              schema:
-                $ref: "./entity/item.yml"
         default:
           $ref: "./errors/unexpected.yml"
   /items/{item_id}:
-    put:
+    post:
       summary: アイテム情報を更新するエンドポイント
       description: |-
         ## 概要
@@ -366,101 +338,52 @@ paths:
             schema:
               type: object
               properties:
+                category_id:
+                  type: integer
+                  description: 更新後のアイテムのカテゴリID
+                  example: 1
                 item_title:
                   type: string
-                  description: 更新するアイテムのタイトル
+                  description: 更新後のアイテムのタイトル
                   example: TODO
                 content:
                   type: string
-                  description: 更新するアイテムの内容
+                  description: 更新後のアイテムの内容
                   example: "TODOの内容"
                 expired_at:
                   type: string
-                  description: 更新するアイテムの期限
+                  description: 更新後のアイテムの期限
                   format: date-time
                   example: "2021-01-01 00:00:00"
               required:
+                - category_id
                 - item_title
                 - content
                 - expired_at
       responses:
         "200":
           description: Successfully update an item
-          content:
-            application/json:
-              schema:
-                $ref: "./entity/item.yml"
         default:
           $ref: "./errors/unexpected.yml"
-    post:
-      summary: アイテムをアーカイブするエンドポイント
+    delete:
+      summary: アイテムを削除するエンドポイント
       description: |-
         ## 概要
-        - アイテムIDを受け取り、アイテムをアーカイブする
+        - アイテムIDを受け取り、アイテムを削除する
       tags:
         - items
-      operationId: archiveItem
+      operationId: deleteItem
       security: []
       parameters:
         - name: item_id
           in: path
-          description: アーカイブするアイテムのID
+          description: 削除するアイテムのID
           required: true
           schema:
             type: integer
             example: 1
       responses:
         "204":
-          description: Successfully archive an item
-        default:
-          $ref: "./errors/unexpected.yml"
-  /items/archived:
-    get:
-      summary: ボード内のアーカイブ済みアイテム一覧を取得するエンドポイント
-      description: |-
-        ## 概要
-        - 特定のボード内のアーカイブ済みアイテム一覧を取得する
-      tags:
-        - items
-      operationId: getArchivedItems
-      security: []
-      paramter:
-        - name: board_id
-          in: query
-          description: アーカイブ済みアイテム一覧を取得するボードのID
-          required: true
-          schema:
-            type: integer
-            example: 1
-      responses:
-        "200":
-          description: 特定のボード内のアーカイブ済みアイテムを全て返す
-          content:
-            application/json:
-              schema:
-                $ref: "./responses/items.yml"
-        default:
-          $ref: "./errors/unexpected.yml"
-  /items/archived/{item_id}:
-    post:
-      summary: アイテムをアーカイブ解除するエンドポイント
-      description: |-
-        ## 概要
-        - アイテムIDを受け取り、アイテムをアーカイブ解除する
-      tags:
-        - items
-      operationId: unarchiveItem
-      security: []
-      parameters:
-        - name: item_id
-          in: path
-          description: アーカイブ解除するアイテムのID
-          required: true
-          schema:
-            type: integer
-            example: 1
-      responses:
-        "204":
-          description: Successfully unarchive an item
+          description: Successfully delete an item
         default:
           $ref: "./errors/unexpected.yml"
