@@ -26,7 +26,6 @@ func SetUpRouter(db *gorm.DB) *mux.Router {
 	boardsHandler := handler.NewBoardsHandler(boardsUsecase)
 	categoriesHandler := handler.NewCategoriesHandler(categoriesUsecase)
 	itemsHandler := handler.NewItemsHandler(itemsUsecase)
-	archivedItemsHandler := handler.NewArchivedItemsHandler(itemsUsecase)
 
 	// エンドポイントの設定
 	r := mux.NewRouter()
@@ -44,10 +43,7 @@ func SetUpRouter(db *gorm.DB) *mux.Router {
 	r.HandleFunc("/items", itemsHandler.GetItems).Methods(http.MethodGet)
 	r.HandleFunc("/items", itemsHandler.CreateItem).Methods(http.MethodOptions, http.MethodPost)
 	r.HandleFunc("/items/{itemID}", itemsHandler.UpdateItem).Methods(http.MethodOptions, http.MethodPost)
-	r.HandleFunc("/items/{itemID}", itemsHandler.ArchiveItem).Methods(http.MethodOptions, http.MethodPost)
-
-	r.HandleFunc("/items/archived", archivedItemsHandler.GetArchivedItems).Methods(http.MethodGet)
-	r.HandleFunc("/items/archived/{itemID}", archivedItemsHandler.UnArchiveItem).Methods(http.MethodOptions, http.MethodPost)
+	r.HandleFunc("/items/{itemID}", itemsHandler.DeleteItem).Methods(http.MethodDelete)
 
 	r.Use(CORSMiddleware)
 	

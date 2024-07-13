@@ -8,11 +8,9 @@ import (
 type (
 	IItemsRepo interface {
 		GetItems(categoryID uint64) ([]model.Item, error)
-		GetArchivedItems(boardID uint64) ([]model.Item, error)
 		CreateItem(item *model.Item) error
-		UpdateItem(item *model.Item) error
-		ArchiveItem(itemID uint64) error
-		UnArchiveItem(itemID uint64) error
+		UpdateItem(itemID, categoryID uint64, item_title, content, expired_at string) error
+		DeleteItem(itemID uint64) error
 	}
 	ItemsRepo struct {
 		db *gorm.DB
@@ -25,16 +23,7 @@ func NewItemsRepo(db *gorm.DB) *ItemsRepo {
 
 func (ir *ItemsRepo) GetItems(categoryID uint64) ([]model.Item, error) {
 	var items []model.Item
-	err := ir.db.Model(&[]model.Item{}).Where("category_id = ? AND archived = ?", categoryID, false).Find(&items).Error
-	return items, err
-}
-
-func (ir *ItemsRepo) GetArchivedItems(boardID uint64) ([]model.Item, error) {
-	var items []model.Item
-	err := ir.db.Model(&[]model.Item{}).Joins("JOIN categories ON items.category_id = categories.id").
-        Where("categories.board_id = ? AND items.archived = ?", boardID, true).
-        Find(&items).Error
-		
+	err := ir.db.Model(&[]model.Item{}).Where("category_id = ? AND deleted = ?", categoryID, false).Find(&items).Error
 	return items, err
 }
 
@@ -43,17 +32,12 @@ func (ir *ItemsRepo) CreateItem(item *model.Item) error {
 	return err
 }
 
-func (ir *ItemsRepo) UpdateItem(item *model.Item) error {
-	err := ir.db.Model(&model.Item{}).Where("id = ?", item.ID).Save(&item).Error
+func (ir *ItemsRepo) UpdateItem(itemID, categoryID uint64, item_title, content, expired_at string) error {
+	err := ir.db.Model(&model.Item{}).Where("id = ?", itemID).Update("category_id", categoryID).Update("title", item_title).Update("content", content).Update("expired_at", expired_at).Error
 	return err
 }
 
-func (ir *ItemsRepo) ArchiveItem(itemID uint64) error {
-	err := ir.db.Model(&model.Item{}).Where("id = ?", itemID).Update("archived", true).Error
-	return err
-}
-
-func (ir *ItemsRepo) UnArchiveItem(itemID uint64) error {
-	err := ir.db.Model(&model.Item{}).Where("id = ?", itemID).Update("archived", false).Error
+func (ir *ItemsRepo) DeleteItem(itemID uint64) error {
+	err := ir.db.Model(&model.Item{}).Where("id = ?", itemID).Update("deleted", true).Error
 	return err
 }

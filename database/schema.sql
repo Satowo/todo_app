@@ -21,7 +21,7 @@ CREATE TABLE `items` (
 	`title` varchar(20) NOT NULL,
 	`content` varchar(500) NOT NULL,
 	`expired_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`archived` boolean NOT NULL DEFAULT FALSE,
+	`deleted` boolean NOT NULL DEFAULT FALSE,
 	PRIMARY KEY (`id`),
 	CONSTRAINT `fk_categories`
 	FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`)

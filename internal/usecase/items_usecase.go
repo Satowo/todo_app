@@ -8,11 +8,9 @@ import (
 type (
 	IItemsUsecase interface {
 		GetItems(categoryID uint64) ([]model.Item, error)
-		GetArchivedItems(boardID uint64) ([]model.Item, error)
-		CreateItem(item *model.Item) error
-		UpdateItem(item *model.Item) error
-		ArchiveItem(itemID uint64) error
-		UnArchiveItem(itemID uint64) error
+		CreateItem(categoryID uint64, itemTitle, content, expiredAt string) error
+		UpdateItem(itemID, categoryID uint64, item_title, content, expired_at string) error
+		DeleteItem(itemID uint64) error
 	}
 	ItemsUsecase struct {
 		repo repository.IItemsRepo
@@ -31,32 +29,28 @@ func (iu *ItemsUsecase) GetItems(categoryID uint64) ([]model.Item, error) {
 	return 	items, err
 }
 
-func (iu *ItemsUsecase) GetArchivedItems(boardID uint64) ([]model.Item, error) {
-	items, err := iu.repo.GetArchivedItems(boardID)
-	
-	return 	items, err
-}
+func (iu *ItemsUsecase) CreateItem(categoryID uint64, itemTitle, content, expiredAt string) error {
+	item := &model.Item{
+		CategoryID: categoryID,
+		Title: itemTitle,
+		Content: content,
+		ExpiredAt: expiredAt,
+		Deleted: false,
+	}
 
-func (iu *ItemsUsecase) CreateItem(item *model.Item) error {
 	err := iu.repo.CreateItem(item)
 
 	return err
 }
 
-func (iu *ItemsUsecase) UpdateItem(item *model.Item) error {
-	err := iu.repo.UpdateItem(item)
+func (iu *ItemsUsecase) UpdateItem(itemID, categoryID uint64, item_title, content, expired_at string) error {
+	err := iu.repo.UpdateItem(itemID, categoryID, item_title, content, expired_at)
 
 	return err
 }
 
-func (iu *ItemsUsecase) ArchiveItem(itemID uint64) error {
-	err := iu.repo.ArchiveItem(itemID)
-
-	return err
-}
-
-func (iu *ItemsUsecase) UnArchiveItem(itemID uint64) error {
-	err := iu.repo.UnArchiveItem(itemID)
+func (iu *ItemsUsecase) DeleteItem(itemID uint64) error {
+	err := iu.repo.DeleteItem(itemID)
 
 	return err
 }
