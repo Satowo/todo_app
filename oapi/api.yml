@@ -165,14 +165,6 @@ paths:
         - categories
       operationId: createCategories
       security: []
-      parameters:
-        - name: board_id
-          in: query
-          description: カテゴリ一覧を取得するボードのID
-          required: true
-          schema:
-            type: integer
-            example: 1
       requestBody:
         description: 新規作成するカテゴリ
         required: true
@@ -185,13 +177,13 @@ paths:
                   type: integer
                   description: 新規作成するカテゴリのボードID
                   example: 1
-                title:
+                category_title:
                   type: string
                   description: 新規作成するカテゴリのタイトル
                   example: TODO
               required:
                 - board_id
-                - title
+                - category_title
       responses:
         "201":
           description: Successfully create a new category
@@ -227,12 +219,12 @@ paths:
             schema:
               type: object
               properties:
-                title:
+                category_title:
                   type: string
                   description: 更新するカテゴリのタイトル
                   example: TODO
               required:
-                - title
+                - category_title
       responses:
         "200":
           description: Successfully update a category
@@ -320,7 +312,7 @@ paths:
                   type: integer
                   description: 新規作成するアイテムのカテゴリID
                   example: 1
-                title:
+                item_title:
                   type: string
                   description: 新規作成するアイテムのタイトル
                   example: TODO
@@ -336,7 +328,7 @@ paths:
               required:
                 - board_id
                 - category_id
-                - title
+                - item_title
                 - content
                 - expired_at
       responses:
@@ -374,7 +366,7 @@ paths:
             schema:
               type: object
               properties:
-                title:
+                item_title:
                   type: string
                   description: 更新するアイテムのタイトル
                   example: TODO
@@ -388,7 +380,7 @@ paths:
                   format: date-time
                   example: "2021-01-01 00:00:00"
               required:
-                - title
+                - item_title
                 - content
                 - expired_at
       responses:

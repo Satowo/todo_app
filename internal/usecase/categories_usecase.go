@@ -9,7 +9,7 @@ type (
 	ICategoriesUsecase interface {
 		GetCategories(boardID uint64) ([]model.Category, error)
 		CreateCategory(category *model.Category) error
-		UpdateCategory(category *model.Category) error
+		UpdateCategory(categoryID uint64, categoryTitle string) error
 		DeleteCategory(categoryID uint64) error
 	}
 	CategoriesUsecase struct {
@@ -35,8 +35,8 @@ func (bu *CategoriesUsecase) CreateCategory(category *model.Category) error {
 	return err
 }
 
-func (bu *CategoriesUsecase) UpdateCategory(category *model.Category) error {
-	err := bu.repo.UpdateCategory(category)
+func (bu *CategoriesUsecase) UpdateCategory(categoryID uint64, categoryTitle string) error {
+	err := bu.repo.UpdateCategory(categoryID, categoryTitle)
 
 	return err
 }

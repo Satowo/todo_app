@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/satowo/todo-app/internal/controller/types"
 	"github.com/satowo/todo-app/internal/model"
 	"github.com/satowo/todo-app/internal/usecase"
 )
@@ -82,20 +83,14 @@ func (bh *CategoriesHandler) UpdateCategory(w http.ResponseWriter, r *http.Reque
 	}
 
 	// リクエストボディをデコード
-	var category model.Category
-	if err := json.NewDecoder(r.Body).Decode(&category); err != nil {
+	var req types.CreateCategoryRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Printf("fail: json.NewDecoder, %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	// リクエストボディのCategoryIDとパスパラメータのCategoryIDが一致しない場合は400を返す
-	if category.ID != convertedCategoryID{
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	if err := bh.CategoriesUsecase.UpdateCategory(&category); err != nil {
+	if err := bh.CategoriesUsecase.UpdateCategory(convertedCategoryID, req.CategoryTitle); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

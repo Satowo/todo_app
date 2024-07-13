@@ -23,10 +23,10 @@ properties:
 example:
   id: 1
   board_id: 1
-  title: "category title"
+  category_title: "category title"
   deleted: false
 required:
   - id
   - board_id
-  - title
+  - category_title
   - deleted

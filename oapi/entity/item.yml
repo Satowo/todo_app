@@ -30,13 +30,13 @@ properties:
 example:
   id: 1
   category_id: 1
-  title: "item title"
+  item_title: "item title"
   content: "item content"
   expired_at: "2021-01-01 00:00:00"
   archived: false
 required:
   - id
   - category_id
-  - title
+  - item_title
   - content
   - archived
