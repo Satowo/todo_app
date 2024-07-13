@@ -18,9 +18,9 @@ properties:
     default: false
 example:
   id: 1
-  title: "board title"
+  board_title: "board title"
   deleted: false
 required:
   - id
-  - title
+  - board_title
   - deleted
