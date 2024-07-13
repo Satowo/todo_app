@@ -10,7 +10,7 @@ type (
 		GetCategories(boardID uint64) ([]model.Category, error)
 		CreateCategory(category *model.Category) error
 		UpdateCategory(category *model.Category) error
-		DeleteCategory(category *model.Category) error
+		DeleteCategory(category uint64) error
 	}
 	CategoriesRepo struct {
 		db *gorm.DB
@@ -37,7 +37,7 @@ func (br *CategoriesRepo) UpdateCategory(category *model.Category) error {
 	return err
 }
 
-func (br *CategoriesRepo) DeleteCategory(category *model.Category) error {
-	err := br.db.Delete(&category).Error
+func (br *CategoriesRepo) DeleteCategory(categoryID uint64) error {
+	err := br.db.Model(&model.Category{}).Where("id = ?", categoryID).Update("deleted", true).Error
 	return err
 }

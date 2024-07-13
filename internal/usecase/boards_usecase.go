@@ -11,7 +11,7 @@ type (
 		GetBoards() ([]model.Board, error)
 		CreateBoard(param *types.CreateBoardRequest) error
 		UpdateBoard(board *model.Board) error
-		DeleteBoard(board *model.Board) error
+		DeleteBoard(board uint64) error
 	}
 	BoardsUsecase struct {
 		repo repository.IBoardsRepo
@@ -47,8 +47,8 @@ func (bu *BoardsUsecase) UpdateBoard(board *model.Board) error {
 	return err
 }
 
-func (bu *BoardsUsecase) DeleteBoard(board *model.Board) error {
-	err := bu.repo.DeleteBoard(board)
+func (bu *BoardsUsecase) DeleteBoard(boardID uint64) error {
+	err := bu.repo.DeleteBoard(boardID)
 
 	return err
 }

@@ -10,7 +10,7 @@ type (
 		GetCategories(boardID uint64) ([]model.Category, error)
 		CreateCategory(category *model.Category) error
 		UpdateCategory(category *model.Category) error
-		DeleteCategory(category *model.Category) error
+		DeleteCategory(categoryID uint64) error
 	}
 	CategoriesUsecase struct {
 		repo repository.ICategoriesRepo
@@ -26,7 +26,7 @@ func NewCategoriesUsecase(repo repository.ICategoriesRepo) *CategoriesUsecase {
 func (bu *CategoriesUsecase) GetCategories(boardID uint64) ([]model.Category, error) {
 	categories, err := bu.repo.GetCategories(boardID)
 
-	return 	categories, err
+	return categories, err
 }
 
 func (bu *CategoriesUsecase) CreateCategory(category *model.Category) error {
@@ -41,8 +41,8 @@ func (bu *CategoriesUsecase) UpdateCategory(category *model.Category) error {
 	return err
 }
 
-func (bu *CategoriesUsecase) DeleteCategory(category *model.Category) error {
-	err := bu.repo.DeleteCategory(category)
+func (bu *CategoriesUsecase) DeleteCategory(categoryID uint64) error {
+	err := bu.repo.DeleteCategory(categoryID)
 
 	return err
 }
