@@ -104,7 +104,7 @@ func (bh *CategoriesHandler) UpdateCategory(w http.ResponseWriter, r *http.Reque
 }
 
 func (bh *CategoriesHandler) DeleteCategory(w http.ResponseWriter, r *http.Request) {
-	categoryID := 	mux.Vars(r)["categoryID"]
+	categoryID := mux.Vars(r)["categoryID"]
 
 	// stringをuint64に変換
 	convertedCategoryID, err := strconv.ParseUint(categoryID, 10, 64)
@@ -113,11 +113,7 @@ func (bh *CategoriesHandler) DeleteCategory(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	category := model.Category{
-		ID: convertedCategoryID,
-	}
-
-	if err := bh.CategoriesUsecase.DeleteCategory(&category); err != nil {
+	if err := bh.CategoriesUsecase.DeleteCategory(convertedCategoryID); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

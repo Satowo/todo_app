@@ -106,11 +106,7 @@ func (bh *BoardsHandler) DeleteBoard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	board := model.Board{
-		ID: convertedboardID,
-	}
-
-	if err := bh.boardsUsecase.DeleteBoard(&board); err != nil {
+	if err := bh.boardsUsecase.DeleteBoard(convertedboardID); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
