@@ -8,7 +8,7 @@ import (
 type (
 	ICategoriesUsecase interface {
 		GetCategories(boardID uint64) ([]model.Category, error)
-		CreateCategory(category *model.Category) error
+		CreateCategory(boardID uint64, categoryTitle string) error
 		UpdateCategory(categoryID uint64, categoryTitle string) error
 		DeleteCategory(categoryID uint64) error
 	}
@@ -29,7 +29,13 @@ func (bu *CategoriesUsecase) GetCategories(boardID uint64) ([]model.Category, er
 	return categories, err
 }
 
-func (bu *CategoriesUsecase) CreateCategory(category *model.Category) error {
+func (bu *CategoriesUsecase) CreateCategory(boardID uint64, categoryTitle string) error {
+	category := &model.Category{
+		BoardID: boardID,
+		Title: categoryTitle,
+		Deleted: false,
+	}
+
 	err := bu.repo.CreateCategory(category)
 
 	return err

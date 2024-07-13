@@ -8,7 +8,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/satowo/todo-app/internal/controller/types"
-	"github.com/satowo/todo-app/internal/model"
 	"github.com/satowo/todo-app/internal/usecase"
 )
 
@@ -57,14 +56,14 @@ func (bh *CategoriesHandler) GetCategories(w http.ResponseWriter, r *http.Reques
 }
 
 func (bh *CategoriesHandler) CreateCategory(w http.ResponseWriter, r *http.Request) {
-	var category model.Category
-	if err := json.NewDecoder(r.Body).Decode(&category); err != nil {
+	var req types.CreateCategoryRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Printf("fail: json.NewDecoder, %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	if err := bh.CategoriesUsecase.CreateCategory(&category); err != nil {
+	if err := bh.CategoriesUsecase.CreateCategory(req.BoardID, req.CategoryTitle); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -83,7 +82,7 @@ func (bh *CategoriesHandler) UpdateCategory(w http.ResponseWriter, r *http.Reque
 	}
 
 	// リクエストボディをデコード
-	var req types.CreateCategoryRequest
+	var req types.UpdateCategoryRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Printf("fail: json.NewDecoder, %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)

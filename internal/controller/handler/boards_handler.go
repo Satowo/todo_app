@@ -8,7 +8,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/satowo/todo-app/internal/controller/types"
-	"github.com/satowo/todo-app/internal/model"
 	"github.com/satowo/todo-app/internal/usecase"
 )
 
@@ -49,14 +48,14 @@ func (bh *BoardsHandler) GetBoards(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (bh *BoardsHandler) CreateBoard(w http.ResponseWriter, r *http.Request) {
-	var param types.CreateBoardRequest
-	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
+	var req types.CreateBoardRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Printf("fail: json.NewDecoder, %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	if err := bh.boardsUsecase.CreateBoard(&param); err != nil {
+	if err := bh.boardsUsecase.CreateBoard(&req); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -75,20 +74,14 @@ func (bh *BoardsHandler) UpdateBoard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// リクエストボディをデコード
-	var board model.Board
-	if err := json.NewDecoder(r.Body).Decode(&board); err != nil {
+	var req types.UpdateBoardRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Printf("fail: json.NewDecoder, %v\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	// リクエストボディのboardIDとパスパラメータのboardIDが一致しない場合は400を返す
-	if board.ID != convertedboardID{
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	if err := bh.boardsUsecase.UpdateBoard(&board); err != nil {
+	if err := bh.boardsUsecase.UpdateBoard(convertedboardID, req.BoardTitle); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

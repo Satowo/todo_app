@@ -9,7 +9,7 @@ type (
 	IBoardsRepo interface {
 		GetBoards() ([]model.Board, error)
 		CreateBoard(board *model.Board) error
-		UpdateBoard(board *model.Board) error
+		UpdateBoard(boardID uint64, boardTitle string) error
 		DeleteBoard(board uint64) error
 	}
 	BoardsRepo struct {
@@ -32,8 +32,8 @@ func (br *BoardsRepo) CreateBoard(board *model.Board) error {
 	return err
 }
 
-func (br *BoardsRepo) UpdateBoard(board *model.Board) error {
-	err := br.db.Save(&board).Error
+func (br *BoardsRepo) UpdateBoard(boardID uint64, boardTitle string) error {
+	err := br.db.Model(&model.Board{}).Where("id = ?", boardID).Update("title", boardTitle).Error
 	return err
 }
 

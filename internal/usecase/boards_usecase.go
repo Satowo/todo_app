@@ -10,7 +10,7 @@ type (
 	IBoardsUsecase interface {
 		GetBoards() ([]model.Board, error)
 		CreateBoard(param *types.CreateBoardRequest) error
-		UpdateBoard(board *model.Board) error
+		UpdateBoard(boardID uint64, boardTitle string) error
 		DeleteBoard(board uint64) error
 	}
 	BoardsUsecase struct {
@@ -41,8 +41,8 @@ func (bu *BoardsUsecase) CreateBoard(param *types.CreateBoardRequest) error {
 	return err
 }
 
-func (bu *BoardsUsecase) UpdateBoard(board *model.Board) error {
-	err := bu.repo.UpdateBoard(board)
+func (bu *BoardsUsecase) UpdateBoard(boardID uint64, boardTitle string) error {
+	err := bu.repo.UpdateBoard(boardID, boardTitle)
 
 	return err
 }
