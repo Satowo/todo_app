@@ -20,7 +20,7 @@ CREATE TABLE `items` (
 	`category_id` BIGINT UNSIGNED NOT NULL,
 	`title` varchar(20) NOT NULL,
 	`content` varchar(500) NOT NULL,
-	`expired_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`expired_at` date NOT NULL,
 	`deleted` boolean NOT NULL DEFAULT FALSE,
 	PRIMARY KEY (`id`),
 	CONSTRAINT `fk_categories`
@@ -34,13 +34,13 @@ INSERT INTO items
 	title,
 	content,
 	expired_at,
-	archived
+	deleted
 )
 VALUES
-(1, 1, 'title_1', 'content_1', '2021-01-01 00:00:00', DEFAULT),
-(2, 2, 'title_2', 'content_2', '2021-01-01 00:00:00', DEFAULT),
-(3, 3, 'title_3', 'content_3', '2021-01-01 00:00:00', DEFAULT),
-(4, 4, 'title_4', 'content_4', '2021-01-01 00:00:00', TRUE);
+(1, 1, 'title_1', 'content_1', '2021-01-01', DEFAULT),
+(2, 2, 'title_2', 'content_2', '2021-01-01', DEFAULT),
+(3, 3, 'title_3', 'content_3', '2021-01-01', DEFAULT),
+(4, 4, 'title_4', 'content_4', '2021-01-01', TRUE);
 
 INSERT INTO categories
 (
